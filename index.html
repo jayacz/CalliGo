@@ -1,0 +1,1439 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>书 Calli GO</title>
+  
+  <!-- Mobilné nastavenia a nová svetlá fialová #f8f5ff -->
+  <meta name="theme-color" content="#f8f5ff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ff">
+
+  <!-- Ikona s novým svetlým pozadím -->
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23f8f5ff%22/><text y=%2250%%22 x=%2250%%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-family=%22serif%22 font-size=%2260%22 fill=%22%23a67c52%22 stroke=%22black%22 stroke-width=%221.5%22>书</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23f8f5ff%22/><text y=%2250%%22 x=%2250%%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-family=%22serif%22 font-size=%2260%22 fill=%22%23a67c52%22 stroke=%22black%22 stroke-width=%221.5%22>书</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Noto+Serif+SC:wght@400;700;900&family=Cormorant+Garamond:wght@400;600&display=swap" rel="stylesheet">
+  
+  <style>
+    /* RESET & SCROLLING */
+    * { box-sizing: border-box; margin: 0; padding: 0; touch-action: none; }
+    
+    html, body { 
+      width: 100%; 
+      min-height: 100%;
+      background-color: #f8f5ff; /* Extra Light Purple */
+      overflow-x: hidden;
+      overflow-y: auto; 
+    }
+    
+    body { 
+      font-family: 'Cormorant Garamond', serif; 
+      color: #8c6d4f;
+      background-image: radial-gradient(circle at 20% 30%, rgba(225, 200, 255, 0.4) 0%, transparent 50%), radial-gradient(circle at 80% 70%, rgba(255, 215, 245, 0.4) 0%, transparent 50%);
+      background-attachment: fixed;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 20px 15px calc(20px + env(safe-area-inset-bottom));
+    }
+
+    /* ŠÍRKY */
+    .w-total { width: 100%; max-width: 420px; } 
+    .w-symbol { width: 100%; max-width: 350px; } 
+    .w-nav { width: 100%; max-width: 280px; }    
+
+    /* HEADER - COMPACT CENTERING */
+    .app-header { width: 100%; max-width: 420px; text-align: center; margin-bottom: 20px; }
+    .header-group { 
+      display: grid; 
+      grid-template-columns: 1fr auto 1fr; 
+      align-items: center; 
+      width: 100%;
+      margin-bottom: -5px; /* Pull motto closer up */
+    }
+    .title-char { 
+      font-family: 'Noto Serif SC', serif; 
+      font-size: clamp(2.5rem, 10vw, 4.2rem); 
+      color: #a67c52; 
+      -webkit-text-stroke: 1.5px #000; 
+      font-weight: 400; 
+      justify-self: end;
+      padding-right: 15px;
+    }
+    .app-title-text { font-family: 'Dancing Script', cursive; color: #000; font-size: clamp(2.5rem, 10vw, 4.2rem); line-height: 1; }
+    .title-spacer { width: 100%; } 
+    
+    .motto { 
+      font-size: clamp(1rem, 4.5vw, 1.6rem); font-weight: 800; text-align: center; 
+      text-decoration: underline; text-decoration-color: #000; text-underline-offset: 5px; text-decoration-thickness: 2px;
+      margin-top: 0px; /* Reduced gap */
+      line-height: 1;
+    }
+
+    /* CANVAS - ALL CORNERS ROUNDED */
+    .canvas-card { 
+      position: relative; width: 100%; aspect-ratio: 1/1; 
+      background-color: #f7ead0; border: 8px solid white; 
+      border-radius: 2.5rem; 
+      overflow: hidden; 
+    }
+    .paper-texture { background-image: url("https://www.transparenttextures.com/patterns/handmade-paper.png"); width: 100%; height: 100%; }
+    
+    #canvas-wrap.show-grid .paper-texture {
+      background-image: url("https://www.transparenttextures.com/patterns/handmade-paper.png"),
+        linear-gradient(to right, rgba(140,109,79,0.3) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(140,109,79,0.3) 1px, transparent 1px) !important;
+      background-size: auto, 100px 100px, 100px 100px !important;
+    }
+
+    /* BUTTONS */
+    .btn-base { transition: all 0.2s ease; font-weight: 900; text-transform: uppercase; display: flex; align-items: center; justify-content: center; border-radius: 1.5rem; cursor: pointer; }
+    .btn-primary { background-color: #a67c52; color: white; border: 3px solid #a67c52; }
+    .btn-secondary { background-color: white; color: #a67c52; border: 3px solid rgba(166, 124, 82, 0.3); }
+
+    /* LAYERS */
+    #drawingCanvas { position: absolute; top: 0; left: 0; z-index: 10; touch-action: none; width: 100%; height: 100%; }
+    #guideCanvas { position: absolute; top: 0; left: 0; z-index: 2; opacity: 0.55; pointer-events: none; width: 100%; height: 100%; }
+    
+    .footer-credit { margin-top: 30px; font-size: 1.1rem; opacity: 0.8; font-weight: 700; color: #8c6d4f; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+  </style>
+</head>
+<body>
+
+    <!-- 1. HEADER -->
+    <header class="app-header">
+      <div class="header-group">
+        <span class="title-char">书</span>
+        <h1 class="app-title-text">Calli GO</h1>
+        <div class="title-spacer"></div>
+      </div>
+      <p class="motto">Gotta Write ’Em All!</p>
+    </header>
+
+    <!-- 2. NAVIGATION -->
+    <nav class="w-nav flex gap-3 mb-6">
+      <button id="btnPractice" class="btn-base flex-1 py-3 text-lg btn-primary">Practice</button>
+      <button id="btnGallery" class="btn-base flex-1 py-3 text-lg btn-secondary">Callidex</button>
+    </nav>
+
+    <!-- 3. MAIN CONTENT -->
+    <main class="w-full flex flex-col items-center">
+      
+      <!-- PRACTICE VIEW -->
+      <div id="practiceView" class="w-full flex flex-col items-center">
+        
+        <!-- Info Card -->
+        <div class="w-symbol flex items-center justify-between bg-white/70 backdrop-blur-xl p-4 mb-6 rounded-[2.5rem] border border-white shadow-lg">
+          <div class="flex items-center gap-8">
+            <div id="displayArea" class="text-7xl text-black font-normal leading-none" style="font-family:'Noto Serif SC',serif;">永</div>
+            <div>
+              <p id="charPinyin" class="text-2xl font-bold text-[#a67c52]">yǒng</p>
+              <p id="charMeaning" class="text-2xl italic text-black font-black">forever</p>
+            </div>
+          </div>
+          <button id="btnGenerate" class="btn-primary p-4 rounded-2xl active:scale-90 transition-transform">
+            <i data-lucide="refresh-cw"></i>
+          </button>
+        </div>
+
+        <!-- Square Canvas Block -->
+        <div class="w-total canvas-card shadow-xl mb-4" id="canvas-wrap">
+          <canvas id="guideCanvas" class="paper-texture"></canvas>
+          <canvas id="drawingCanvas"></canvas>
+        </div>
+
+        <!-- Bottom Toolbar -->
+        <div class="w-symbol flex flex-col gap-3 bg-white/30 p-4 rounded-[2.5rem] shadow-lg">
+          <div class="flex gap-3 w-full">
+            <button id="btnStepBack" class="btn-base p-4 btn-secondary shrink-0"><i data-lucide="undo-2"></i></button>
+            <button id="btnClearCanvas" class="btn-base flex-1 py-4 text-xl btn-secondary uppercase">Clear</button>
+            <button id="btnStepForward" class="btn-base p-4 btn-secondary shrink-0"><i data-lucide="redo-2"></i></button>
+          </div>
+          <div class="flex gap-3 w-full">
+            <button id="btnToggleGrid" class="btn-base flex-1 py-4 text-xl btn-secondary">Grid</button>
+            <button id="btnToggleGuide" class="btn-base flex-1 py-4 text-xl btn-secondary">Trace</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CALLIDEX VIEW -->
+      <div id="galleryView" class="hidden w-full flex flex-col items-center px-4">
+        <input type="text" id="searchBar" class="w-full max-w-[350px] p-4 mb-8 rounded-2xl border-2 border-[#a67c52]/30 outline-none text-center text-xl shadow-sm" placeholder="Search by meaning...">
+        <div id="galleryGrid" class="w-total grid grid-cols-2 gap-6 pb-12"></div>
+      </div>
+
+    </main>
+
+    <footer class="footer-credit">Vibe coded for Adel by Jj 🫰</footer>
+
+  <script>
+  // --- DATABASE ---
+  const characters = [
+  { char:'一', pinyin:'yī', meaning:'one' },
+    { char:'丨', pinyin:'shù', meaning:'vertical' },
+    { char:'丩', pinyin:'jiǎo', meaning:'surname' },
+    { char:'丶', pinyin:'zhǔ', meaning:'dot' },
+    { char:'丿', pinyin:'piě', meaning:'slash' },
+    { char:'乀', pinyin:'wǔ', meaning:'stroke' },
+    { char:'乁', pinyin:'kǔn', meaning:'bound' },
+    { char:'乂', pinyin:'yì', meaning:'two' },
+    { char:'乃', pinyin:'nǎi', meaning:'then' },
+    { char:'乄', pinyin:'yí', meaning:'differ' },
+    { char:'久', pinyin:'jiǔ', meaning:'old' },
+    { char:'乆', pinyin:'jiǔ', meaning:'long' },
+    { char:'乇', pinyin:'tuō', meaning:'reject' },
+    { char:'么', pinyin:'jù', meaning:'big' },
+    { char:'义', pinyin:'hé', meaning:'harmony' },
+    { char:'乊', pinyin:'ruò', meaning:'weak' },
+    { char:'之', pinyin:'pō', meaning:'slope' },
+    { char:'乌', pinyin:'wū', meaning:'crow' },
+    { char:'乍', pinyin:'zhà', meaning:'suddenly' },
+    { char:'乎', pinyin:'hū', meaning:'particle' },
+    { char:'乏', pinyin:'fá', meaning:'tired' },
+    { char:'乐', pinyin:'lè', meaning:'happy' },
+    { char:'乑', pinyin:'suǒ', meaning:'place' },
+    { char:'乒', pinyin:'pīng', meaning:'ping' },
+    { char:'乓', pinyin:'pāng', meaning:'pong' },
+    { char:'乔', pinyin:'qiáo', meaning:'tall' },
+    { char:'乕', pinyin:'hǔ', meaning:'tiger' },
+    { char:'乖', pinyin:'guāi', meaning:'obedient' },
+    { char:'乗', pinyin:'chéng', meaning:'ride' },
+    { char:'乘', pinyin:'chéng', meaning:'multiply' },
+    { char:'乙', pinyin:'yǐ', meaning:'second' },
+    { char:'乚', pinyin:'yǐ', meaning:'second' },
+    { char:'乛', pinyin:'zhǔ', meaning:'master' },
+    { char:'乜', pinyin:'miē', meaning:'what' },
+    { char:'九', pinyin:'nà', meaning:'that' },
+    { char:'乞', pinyin:'qǐ', meaning:'beg' },
+    { char:'也', pinyin:'tè', meaning:'special' },
+    { char:'习', pinyin:'xū', meaning:'empty' },
+    { char:'乡', pinyin:'xiāng', meaning:'village' },
+    { char:'乢', pinyin:'tuǒ', meaning:'drag' },
+    { char:'乣', pinyin:'chǐ', meaning:'late' },
+    { char:'乤', pinyin:'cuó', meaning:'twist' },
+    { char:'乥', pinyin:'cāo', meaning:'operate' },
+    { char:'书', pinyin:'gà', meaning:'different' },
+    { char:'乧', pinyin:'xīng', meaning:'flourish' },
+    { char:'乨', pinyin:'guǒ', meaning:'fruit' },
+    { char:'乩', pinyin:'jī', meaning:'divining' },
+    { char:'乪', pinyin:'zǎi', meaning:'carry' },
+    { char:'乫', pinyin:'hǎo', meaning:'good' },
+    { char:'乬', pinyin:'guī', meaning:'return' },
+    { char:'乭', pinyin:'zǒng', meaning:'altogether' },
+    { char:'乮', pinyin:'shuāi', meaning:'decline' },
+    { char:'乯', pinyin:'bǎi', meaning:'hundred' },
+    { char:'买', pinyin:'qiān', meaning:'thousand' },
+    { char:'乱', pinyin:'luàn', meaning:'chaotic' },
+    { char:'乲', pinyin:'zuò', meaning:'do' },
+    { char:'乳', pinyin:'rǔ', meaning:'breast' },
+    { char:'乴', pinyin:'píng', meaning:'calm' },
+    { char:'乵', pinyin:'jiǎng', meaning:'prize' },
+    { char:'乶', pinyin:'yè', meaning:'page' },
+    { char:'乷', pinyin:'zè', meaning:'rule' },
+    { char:'乸', pinyin:'cì', meaning:'female' },
+    { char:'乹', pinyin:'gān', meaning:'dry' },
+    { char:'乺', pinyin:'zī', meaning:'wealth' },
+    { char:'乻', pinyin:'biàn', meaning:'everywhere' },
+    { char:'乼', pinyin:'duō', meaning:'many' },
+    { char:'乽', pinyin:'zuàn', meaning:'diamond' },
+    { char:'乾', pinyin:'qián', meaning:'heaven' },
+    { char:'乿', pinyin:'sǎng', meaning:'throat' },
+    { char:'亀', pinyin:'guī', meaning:'turtle' },
+    { char:'亁', pinyin:'gān', meaning:'dry' },
+    { char:'亂', pinyin:'luàn', meaning:'chaotic' },
+    { char:'亃', pinyin:'mò', meaning:'silent' },
+    { char:'亄', pinyin:'xiōng', meaning:'fierce' },
+    { char:'亅', pinyin:'jù', meaning:'lift' },
+    { char:'二', pinyin:'èr', meaning:'two' },
+    { char:'亇', pinyin:'wéi', meaning:'enclose' },
+    { char:'予', pinyin:'kōng', meaning:'empty' },
+    { char:'争', pinyin:'píng', meaning:'fair' },
+    { char:'亊', pinyin:'shì', meaning:'thing' },
+    { char:'世', pinyin:'shì', meaning:'world' },
+    { char:'二', pinyin:'bō', meaning:'wave' },
+    { char:'丨', pinyin:'shù', meaning:'vertical' },
+    { char:'亍', pinyin:'chù', meaning:'step' },
+    { char:'严', pinyin:'yán', meaning:'severe' },
+    { char:'亏', pinyin:'kuī', meaning:'lose' },
+    { char:'亐', pinyin:'hǒu', meaning:'throat' },
+    { char:'云', pinyin:'huò', meaning:'or' },
+    { char:'互', pinyin:'běng', meaning:'collapse' },
+    { char:'亓', pinyin:'qǐ', meaning:'surname' },
+    { char:'五', pinyin:'hé', meaning:'peace' },
+    { char:'井', pinyin:'huī', meaning:'ashes' },
+    { char:'亖', pinyin:'sì', meaning:'four' },
+    { char:'亗', pinyin:'suì', meaning:'years' },
+    { char:'亘', pinyin:'gèn', meaning:'traverse' },
+    { char:'亙', pinyin:'gèn', meaning:'barrier' },
+    { char:'亚', pinyin:'yà', meaning:'inferior' },
+    { char:'些', pinyin:'zǎi', meaning:'carry' },
+    { char:'亜', pinyin:'yà', meaning:'next' },
+    { char:'亝', pinyin:'diào', meaning:'drop' },
+    { char:'亞', pinyin:'yà', meaning:'asia' },
+    { char:'亟', pinyin:'jí', meaning:'urgently' },
+    { char:'亠', pinyin:'tóu', meaning:'head' },
+    { char:'亡', pinyin:'wáng', meaning:'die' },
+    { char:'亢', pinyin:'kàng', meaning:'proud' },
+    { char:'亣', pinyin:'kǎi', meaning:'triumph' },
+    { char:'交', pinyin:'jiāo', meaning:'cross' },
+    { char:'亥', pinyin:'hài', meaning:'pig' },
+    { char:'亦', pinyin:'yì', meaning:'also' },
+    { char:'亨', pinyin:'hēng', meaning:'success' },
+    { char:'亩', pinyin:'mǔ', meaning:'mu' },
+    { char:'亪', pinyin:'kǎ', meaning:'fit' },
+    { char:'享', pinyin:'dòu', meaning:'fight' },
+    { char:'京', pinyin:'duō', meaning:'many' },
+    { char:'亭', pinyin:'tíng', meaning:'pavilion' },
+    { char:'亮', pinyin:'liàng', meaning:'bright' },
+    { char:'亯', pinyin:'yǎng', meaning:'glorious' },
+    { char:'亰', pinyin:'jīng', meaning:'capital' },
+    { char:'亱', pinyin:'yè', meaning:'night' },
+    { char:'亲', pinyin:'qīn', meaning:'family' },
+    { char:'亳', pinyin:'bó', meaning:'bo' },
+    { char:'亴', pinyin:'tuó', meaning:'camel' },
+    { char:'亵', pinyin:'xiè', meaning:'disrespect' },
+    { char:'亶', pinyin:'dàn', meaning:'sincere' },
+    { char:'亷', pinyin:'lián', meaning:'honest' },
+    { char:'亸', pinyin:'duǒ', meaning:'droop' },
+    { char:'亹', pinyin:'wěi', meaning:'continue' },
+    { char:'人', pinyin:'tuó', meaning:'balance' },
+    { char:'亻', pinyin:'rén', meaning:'person' },
+    { char:'亼', pinyin:'rén', meaning:'person' },
+    { char:'人', pinyin:'rén', meaning:'person' },
+    { char:'亽', pinyin:'shuān', meaning:'spike' },
+    { char:'亾', pinyin:'wáng', meaning:'flee' },
+    { char:'亿', pinyin:'yì', meaning:'billion' },
+    { char:'什', pinyin:'shí', meaning:'ten' },
+    { char:'仁', pinyin:'rén', meaning:'benevolence' },
+    { char:'仂', pinyin:'lè', meaning:'strength' },
+    { char:'仃', pinyin:'tǐng', meaning:'upright' },
+    { char:'仄', pinyin:'zè', meaning:'side' },
+    { char:'仅', pinyin:'jǐn', meaning:'only' },
+    { char:'仆', pinyin:'pú', meaning:'servant' },
+    { char:'仇', pinyin:'chóu', meaning:'enmity' },
+    { char:'仈', pinyin:'gǔn', meaning:'roll' },
+    { char:'仉', pinyin:'zhǎng', meaning:'surname' },
+    { char:'今', pinyin:'jīn', meaning:'now' },
+    { char:'介', pinyin:'jiè', meaning:'between' },
+    { char:'仌', pinyin:'bīng', meaning:'ice' },
+    { char:'仍', pinyin:'réng', meaning:'still' },
+    { char:'从', pinyin:'cóng', meaning:'from' },
+    { char:'仏', pinyin:'fó', meaning:'buddha' },
+    { char:'仐', pinyin:'gōng', meaning:'work' },
+    { char:'仑', pinyin:'lún', meaning:'line' },
+    { char:'仒', pinyin:'rèn', meaning:'burden' },
+    { char:'仓', pinyin:'cāng', meaning:'warehouse' },
+    { char:'仔', pinyin:'zǎi', meaning:'carry' },
+    { char:'仕', pinyin:'shì', meaning:'official' },
+    { char:'他', pinyin:'gé', meaning:'put' },
+    { char:'仗', pinyin:'zhàng', meaning:'rely' },
+    { char:'付', pinyin:'zhòng', meaning:'heavy' },
+    { char:'仙', pinyin:'xiān', meaning:'immortal' },
+    { char:'仚', pinyin:'jiǎo', meaning:'corner' },
+    { char:'仛', pinyin:'jiàn', meaning:'shoulder' },
+    { char:'仜', pinyin:'jìng', meaning:'still' },
+    { char:'仝', pinyin:'tóng', meaning:'same' },
+    { char:'仞', pinyin:'rèn', meaning:'ren' },
+    { char:'仟', pinyin:'qiān', meaning:'thousand' },
+    { char:'仠', pinyin:'běi', meaning:'back' },
+    { char:'仡', pinyin:'yì', meaning:'ethnic' },
+    { char:'仢', pinyin:'tà', meaning:'step' },
+    { char:'代', pinyin:'dài', meaning:'replace' },
+    { char:'令', pinyin:'lìng', meaning:'command' },
+    { char:'以', pinyin:'yǐ', meaning:'use' },
+    { char:'令', pinyin:'jiāng', meaning:'will' },
+    { char:'以', pinyin:'bàng', meaning:'help' },
+    { char:'仦', pinyin:'zhòu', meaning:'ridicule' },
+    { char:'仧', pinyin:'cāng', meaning:'storage' },
+    { char:'仨', pinyin:'sā', meaning:'three' },
+    { char:'仩', pinyin:'shàng', meaning:'up' },
+    { char:'仪', pinyin:'yí', meaning:'ceremony' },
+    { char:'仫', pinyin:'mù', meaning:'ethnic' },
+    { char:'们', pinyin:'men', meaning:'plural' },
+    { char:'仭', pinyin:'rèn', meaning:'burden' },
+    { char:'仮', pinyin:'jiǎ', meaning:'false' },
+    { char:'仯', pinyin:'pàng', meaning:'vast' },
+    { char:'仰', pinyin:'yǎng', meaning:'look up' },
+    { char:'仱', pinyin:'xiōng', meaning:'fierce' },
+    { char:'仲', pinyin:'zhòng', meaning:'middle' },
+    { char:'仳', pinyin:'pǐ', meaning:'compare' },
+    { char:'仴', pinyin:'lèi', meaning:'thunder' },
+    { char:'仵', pinyin:'wǔ', meaning:'coroner' },
+    { char:'件', pinyin:'suī', meaning:'though' },
+    { char:'价', pinyin:'qiú', meaning:'seek' },
+    { char:'仸', pinyin:'yáo', meaning:'important' },
+    { char:'仹', pinyin:'péi', meaning:'accompany' },
+    { char:'仺', pinyin:'dǒu', meaning:'fight' },
+    { char:'任', pinyin:'lì', meaning:'sharp' },
+    { char:'仼', pinyin:'rèn', meaning:'trust' },
+    { char:'份', pinyin:'tè', meaning:'special' },
+    { char:'仾', pinyin:'bǐ', meaning:'compare' },
+    { char:'仿', pinyin:'fǎng', meaning:'imitate' },
+    { char:'伀', pinyin:'bó', meaning:'count' },
+    { char:'企', pinyin:'bèi', meaning:'back' },
+    { char:'伂', pinyin:'hé', meaning:'close' },
+    { char:'伃', pinyin:'yù', meaning:'jade' },
+    { char:'伄', pinyin:'rèn', meaning:'burden' },
+    { char:'伅', pinyin:'lún', meaning:'arrange' },
+    { char:'伆', pinyin:'tíng', meaning:'pavilion' },
+    { char:'伇', pinyin:'bù', meaning:'cloth' },
+    { char:'伈', pinyin:'shì', meaning:'matter' },
+    { char:'伉', pinyin:'kàng', meaning:'equal' },
+    { char:'伊', pinyin:'yī', meaning:'she' },
+    { char:'伋', pinyin:'jí', meaning:'surname' },
+    { char:'伌', pinyin:'luò', meaning:'fall' },
+    { char:'伍', pinyin:'wǔ', meaning:'five' },
+    { char:'伎', pinyin:'jì', meaning:'skill' },
+    { char:'伏', pinyin:'fú', meaning:'hidden' },
+    { char:'伐', pinyin:'fá', meaning:'chop' },
+    { char:'伒', pinyin:'luó', meaning:'line' },
+    { char:'伓', pinyin:'xié', meaning:'evil' },
+    { char:'伔', pinyin:'huó', meaning:'alive' },
+    { char:'伕', pinyin:'fū', meaning:'man' },
+    { char:'伖', pinyin:'píng', meaning:'level' },
+    { char:'众', pinyin:'zuò', meaning:'do' },
+    { char:'优', pinyin:'hàn', meaning:'khan' },
+    { char:'伙', pinyin:'huǒ', meaning:'partner' },
+    { char:'会', pinyin:'jiàng', meaning:'future' },
+    { char:'伛', pinyin:'yǔ', meaning:'bend' },
+    { char:'伜', pinyin:'dì', meaning:'brother' },
+    { char:'伝', pinyin:'zhuàn', meaning:'transmit' },
+    { char:'伞', pinyin:'sǎn', meaning:'umbrella' },
+    { char:'伟', pinyin:'wěi', meaning:'great' },
+    { char:'传', pinyin:'máng', meaning:'blind' },
+    { char:'伡', pinyin:'zuǐ', meaning:'mouth' },
+    { char:'伢', pinyin:'yá', meaning:'child' },
+    { char:'伣', pinyin:'zǒng', meaning:'altogether' },
+    { char:'伤', pinyin:'shāng', meaning:'hurt' },
+    { char:'伥', pinyin:'chāng', meaning:'daze' },
+    { char:'伦', pinyin:'lún', meaning:'logic' },
+    { char:'伧', pinyin:'chuō', meaning:'vulgar' },
+    { char:'伨', pinyin:'guǎi', meaning:'crutch' },
+    { char:'伩', pinyin:'ǔn', meaning:'consent' },
+    { char:'伪', pinyin:'wěi', meaning:'false' },
+    { char:'伫', pinyin:'zhù', meaning:'stop' },
+    { char:'伬', pinyin:'chéng', meaning:'ride' },
+    { char:'伭', pinyin:'chéng', meaning:'succeed' },
+    { char:'伮', pinyin:'chè', meaning:'completely' },
+    { char:'伯', pinyin:'bó', meaning:'count' },
+    { char:'估', pinyin:'shuāi', meaning:'decline' },
+    { char:'估', pinyin:'gū', meaning:'estimate' },
+    { char:'伲', pinyin:'nì', meaning:'humble' },
+    { char:'伳', pinyin:'píng', meaning:'level' },
+    { char:'伴', pinyin:'bàn', meaning:'companion' },
+    { char:'伵', pinyin:'jiáng', meaning:'wall' },
+    { char:'伶', pinyin:'líng', meaning:'clever' },
+    { char:'伷', pinyin:'tè', meaning:'special' },
+    { char:'伸', pinyin:'shēn', meaning:'extend' },
+    { char:'伹', pinyin:'dàn', meaning:'but' },
+    { char:'伺', pinyin:'sì', meaning:'wait' },
+    { char:'伻', pinyin:'xié', meaning:'slant' },
+    { char:'似', pinyin:'shuǎi', meaning:'handsome' },
+    { char:'伽', pinyin:'jiā', meaning:'yoga' },
+    { char:'伾', pinyin:'bǐ', meaning:'compare' },
+    { char:'伿', pinyin:'fèn', meaning:'portion' },
+    { char:'佀', pinyin:'sì', meaning:'resemble' },
+    { char:'佁', pinyin:'qī', meaning:'strange' },
+    { char:'佂', pinyin:'diàn', meaning:'store' },
+    { char:'佃', pinyin:'tián', meaning:'cultivate' },
+    { char:'佄', pinyin:'zhān', meaning:'stick' },
+    { char:'佅', pinyin:'péi', meaning:'accompany' },
+    { char:'但', pinyin:'huī', meaning:'ashes' },
+    { char:'佇', pinyin:'zhù', meaning:'stop' },
+    { char:'佈', pinyin:'bù', meaning:'cloth' },
+    { char:'佉', pinyin:'qū', meaning:'language' },
+    { char:'佊', pinyin:'zhōu', meaning:'week' },
+    { char:'佋', pinyin:'biàn', meaning:'discriminate' },
+    { char:'佌', pinyin:'chī', meaning:'late' },
+    { char:'位', pinyin:'duō', meaning:'many' },
+    { char:'低', pinyin:'tǐ', meaning:'body' },
+    { char:'住', pinyin:'bì', meaning:'mark' },
+    { char:'佐', pinyin:'zuǒ', meaning:'help' },
+    { char:'佑', pinyin:'yòu', meaning:'bless' },
+    { char:'佒', pinyin:'kōu', meaning:'mouth' },
+    { char:'体', pinyin:'shān', meaning:'mountain' },
+    { char:'佔', pinyin:'zhàn', meaning:'occupy' },
+    { char:'何', pinyin:'tuó', meaning:'many' },
+    { char:'佖', pinyin:'diǎn', meaning:'dot' },
+    { char:'佗', pinyin:'tuó', meaning:'it' },
+    { char:'佘', pinyin:'shé', meaning:'surname' },
+    { char:'余', pinyin:'qí', meaning:'strange' },
+    { char:'佚', pinyin:'yì', meaning:'omit' },
+    { char:'佛', pinyin:'fó', meaning:'buddha' },
+    { char:'作', pinyin:'liǔ', meaning:'willow' },
+    { char:'佝', pinyin:'gǒu', meaning:'bend' },
+    { char:'佞', pinyin:'nìng', meaning:'glib' },
+    { char:'佟', pinyin:'tóng', meaning:'surname' },
+    { char:'你', pinyin:'lái', meaning:'come' },
+    { char:'你', pinyin:'nǐ', meaning:'you' },
+    { char:'佢', pinyin:'kòi', meaning:'he' },
+    { char:'佣', pinyin:'yōng', meaning:'hire' },
+    { char:'佤', pinyin:'wǎ', meaning:'ethnic' },
+    { char:'佥', pinyin:'qiān', meaning:'all' },
+    { char:'佦', pinyin:'zhōng', meaning:'middle' },
+    { char:'佧', pinyin:'chà', meaning:'differ' },
+    { char:'佨', pinyin:'chà', meaning:'differ' },
+    { char:'佩', pinyin:'pèi', meaning:'wear' },
+    { char:'佪', pinyin:'huái', meaning:'bosom' },
+    { char:'佫', pinyin:'lǐ', meaning:'inside' },
+    { char:'佬', pinyin:'lǎo', meaning:'old man' },
+    { char:'佭', pinyin:'tián', meaning:'field' },
+    { char:'佮', pinyin:'hé', meaning:'close' },
+    { char:'佯', pinyin:'yáng', meaning:'pretend' },
+    { char:'佰', pinyin:'bǎi', meaning:'hundred' },
+    { char:'佱', pinyin:'shù', meaning:'vertical' },
+    { char:'佲', pinyin:'yóu', meaning:'like' },
+    { char:'佳', pinyin:'jiā', meaning:'excellent' },
+    { char:'佴', pinyin:'ér', meaning:'son' },
+    { char:'併', pinyin:'chà', meaning:'differ' },
+    { char:'佶', pinyin:'jí', meaning:'strong' },
+    { char:'佷', pinyin:'hěn', meaning:'very' },
+    { char:'佸', pinyin:'zhuó', meaning:'turbid' },
+    { char:'佹', pinyin:'guǐ', meaning:'ghost' },
+    { char:'佺', pinyin:'quán', meaning:'complete' },
+    { char:'佻', pinyin:'tiào', meaning:'frivolous' },
+    { char:'佼', pinyin:'jiào', meaning:'excellent' },
+    { char:'佽', pinyin:'cì', meaning:'second' },
+    { char:'佾', pinyin:'yì', meaning:'row' },
+    { char:'使', pinyin:'xiá', meaning:'glow' },
+    { char:'侀', pinyin:'chì', meaning:'shame' },
+    { char:'侁', pinyin:'xìn', meaning:'trust' },
+    { char:'侂', pinyin:'tà', meaning:'platform' },
+    { char:'侃', pinyin:'kǎn', meaning:'sincere' },
+    { char:'侄', pinyin:'zhí', meaning:'nephew' },
+    { char:'侅', pinyin:'zhì', meaning:'wisdom' },
+    { char:'來', pinyin:'xié', meaning:'slant' },
+    { char:'侇', pinyin:'ér', meaning:'son' },
+    { char:'侈', pinyin:'chǐ', meaning:'extravagant' },
+    { char:'侉', pinyin:'kuǎ', meaning:'dialect' },
+    { char:'侊', pinyin:'le', meaning:'happy' },
+    { char:'例', pinyin:'tuó', meaning:'drag' },
+    { char:'侌', pinyin:'hé', meaning:'close' },
+    { char:'侍', pinyin:'shì', meaning:'serve' },
+    { char:'侎', pinyin:'zhú', meaning:'bamboo' },
+    { char:'侏', pinyin:'zhū', meaning:'small' },
+    { char:'侐', pinyin:'xìng', meaning:'flourish' },
+    { char:'侑', pinyin:'yòu', meaning:'encourage' },
+    { char:'侒', pinyin:'kàng', meaning:'peaceful' },
+    { char:'侓', pinyin:'tài', meaning:'extreme' },
+    { char:'侔', pinyin:'móu', meaning:'plan' },
+    { char:'侕', pinyin:'tóng', meaning:'same' },
+    { char:'侖', pinyin:'lún', meaning:'logic' },
+    { char:'侗', pinyin:'tóng', meaning:'naive' },
+    { char:'侘', pinyin:'chà', meaning:'differ' },
+    { char:'侙', pinyin:'kuǎng', meaning:'desolate' },
+    { char:'侚', pinyin:'xiáo', meaning:'empty' },
+    { char:'供', pinyin:'huì', meaning:'gray' },
+    { char:'侜', pinyin:'duàn', meaning:'cheat' },
+    { char:'依', pinyin:'dǎi', meaning:'replace' },
+    { char:'侞', pinyin:'ér', meaning:'son' },
+    { char:'侟', pinyin:'ruǎn', meaning:'soft' },
+    { char:'侠', pinyin:'xiá', meaning:'hero' },
+    { char:'価', pinyin:'shuāi', meaning:'handsome' },
+    { char:'侢', pinyin:'ér', meaning:'son' },
+    { char:'侣', pinyin:'lǚ', meaning:'companion' },
+    { char:'侤', pinyin:'guǒ', meaning:'fruit' },
+    { char:'侥', pinyin:'jiǎo', meaning:'lucky' },
+    { char:'侦', pinyin:'zhēn', meaning:'spy' },
+    { char:'侧', pinyin:'cè', meaning:'side' },
+    { char:'侨', pinyin:'qiáo', meaning:'overseas' },
+    { char:'侩', pinyin:'kuài', meaning:'broker' },
+    { char:'侪', pinyin:'chái', meaning:'companion' },
+    { char:'侫', pinyin:'nìng', meaning:'glib' },
+    { char:'侬', pinyin:'nóng', meaning:'we' },
+    { char:'侭', pinyin:'jìn', meaning:'only' },
+    { char:'侮', pinyin:'wǔ', meaning:'insult' },
+    { char:'侯', pinyin:'hóu', meaning:'marquis' },
+    { char:'侱', pinyin:'péi', meaning:'accompany' },
+    { char:'侲', pinyin:'chéng', meaning:'truthful' },
+    { char:'侳', pinyin:'rù', meaning:'enter' },
+    { char:'侴', pinyin:'zhuó', meaning:'turbid' },
+    { char:'侵', pinyin:'qīn', meaning:'infringe' },
+    { char:'侶', pinyin:'lǚ', meaning:'companion' },
+    { char:'侷', pinyin:'jú', meaning:'bureau' },
+    { char:'侸', pinyin:'yáng', meaning:'glorious' },
+    { char:'侹', pinyin:'bǐ', meaning:'compare' },
+    { char:'侺', pinyin:'duō', meaning:'many' },
+    { char:'侻', pinyin:'fú', meaning:'assist' },
+    { char:'侼', pinyin:'bà', meaning:'ba' },
+    { char:'侽', pinyin:'nán', meaning:'male' },
+    { char:'侾', pinyin:'bì', meaning:'close' },
+    { char:'便', pinyin:'biàn', meaning:'convenient' },
+    { char:'俀', pinyin:'hèn', meaning:'bitter' },
+    { char:'俁', pinyin:'yǐ', meaning:'second' },
+    { char:'係', pinyin:'líng', meaning:'clever' },
+    { char:'促', pinyin:'tà', meaning:'step' },
+    { char:'係', pinyin:'xì', meaning:'tie' },
+    { char:'俅', pinyin:'qiú', meaning:'seek' },
+    { char:'俆', pinyin:'suō', meaning:'shift' },
+    { char:'俇', pinyin:'mò', meaning:'silent' },
+    { char:'俈', pinyin:'duō', meaning:'many' },
+    { char:'俉', pinyin:'zhǔn', meaning:'allow' },
+    { char:'俊', pinyin:'jùn', meaning:'handsome' },
+    { char:'俋', pinyin:'jī', meaning:'quick' },
+    { char:'俌', pinyin:'jiě', meaning:'understand' },
+    { char:'俍', pinyin:'wǔ', meaning:'military' },
+    { char:'俎', pinyin:'zǔ', meaning:'server' },
+    { char:'俏', pinyin:'qiào', meaning:'pretty' },
+    { char:'俐', pinyin:'lì', meaning:'quick' },
+    { char:'俑', pinyin:'yǒng', meaning:'figurine' },
+    { char:'俒', pinyin:'rè', meaning:'hot' },
+    { char:'俓', pinyin:'jìng', meaning:'directly' },
+    { char:'俔', pinyin:'xiáo', meaning:'empty' },
+    { char:'俕', pinyin:'tíng', meaning:'pavilion' },
+    { char:'俖', pinyin:'ruǎn', meaning:'soft' },
+    { char:'俗', pinyin:'sú', meaning:'custom' },
+    { char:'俘', pinyin:'fú', meaning:'capture' },
+    { char:'俙', pinyin:'xī', meaning:'thin' },
+    { char:'俚', pinyin:'lǐ', meaning:'rustic' },
+    { char:'俛', pinyin:'miǎn', meaning:'bend' },
+    { char:'俜', pinyin:'píng', meaning:'lean' },
+    { char:'保', pinyin:'sī', meaning:'private' },
+    { char:'俞', pinyin:'yú', meaning:'yes' },
+    { char:'俟', pinyin:'sì', meaning:'wait' },
+    { char:'俠', pinyin:'xiá', meaning:'hero' },
+    { char:'信', pinyin:'dá', meaning:'attain' },
+    { char:'俢', pinyin:'xiù', meaning:'cultivate' },
+    { char:'俣', pinyin:'yú', meaning:'fork' },
+    { char:'俤', pinyin:'cì', meaning:'second' },
+    { char:'俥', pinyin:'chē', meaning:'cart' },
+    { char:'俦', pinyin:'chóu', meaning:'pair' },
+    { char:'俧', pinyin:'suǒ', meaning:'place' },
+    { char:'俨', pinyin:'yǎn', meaning:'solemn' },
+    { char:'俩', pinyin:'liǎ', meaning:'two' },
+    { char:'俪', pinyin:'lì', meaning:'pair' },
+    { char:'俫', pinyin:'huǒ', meaning:'partner' },
+    { char:'俬', pinyin:'sī', meaning:'private' },
+    { char:'俭', pinyin:'jiǎn', meaning:'frugal' },
+    { char:'修', pinyin:'duō', meaning:'many' },
+    { char:'俯', pinyin:'fǔ', meaning:'look down' },
+    { char:'俰', pinyin:'chèn', meaning:'bare' },
+    { char:'俱', pinyin:'jù', meaning:'together' },
+    { char:'俲', pinyin:'dèng', meaning:'wait' },
+    { char:'俳', pinyin:'pái', meaning:'discard' },
+    { char:'俴', pinyin:'tuó', meaning:'drag' },
+    { char:'俵', pinyin:'biǎo', meaning:'straw' },
+    { char:'俶', pinyin:'chù', meaning:'begin' },
+    { char:'俷', pinyin:'xí', meaning:'practice' },
+    { char:'俸', pinyin:'fèng', meaning:'salary' },
+    { char:'俹', pinyin:'ěr', meaning:'son' },
+    { char:'俺', pinyin:'ǎn', meaning:'I' },
+    { char:'俻', pinyin:'bèi', meaning:'prepare' },
+    { char:'俼', pinyin:'bó', meaning:'count' },
+    { char:'俽', pinyin:'tuó', meaning:'many' },
+    { char:'俾', pinyin:'bǐ', meaning:'cause' },
+    { char:'俿', pinyin:'zuò', meaning:'do' },
+    { char:'倀', pinyin:'chāng', meaning:'daze' },
+    { char:'倁', pinyin:'xìn', meaning:'trust' },
+    { char:'倂', pinyin:'bìng', meaning:'combine' },
+    { char:'倃', pinyin:'hèn', meaning:'bitter' },
+    { char:'倄', pinyin:'guó', meaning:'country' },
+    { char:'倅', pinyin:'cuì', meaning:'deputy' },
+    { char:'倆', pinyin:'liǎ', meaning:'two' },
+    { char:'倇', pinyin:'duō', meaning:'many' },
+    { char:'倈', pinyin:'dǔn', meaning:'dull' },
+    { char:'倉', pinyin:'cāng', meaning:'warehouse' },
+    { char:'倊', pinyin:'shuò', meaning:'bright' },
+    { char:'個', pinyin:'chéng', meaning:'ride' },
+    { char:'倌', pinyin:'guān', meaning:'groom' },
+    { char:'倍', pinyin:'bèi', meaning:'double' },
+    { char:'倎', pinyin:'duì', meaning:'correct' },
+    { char:'倏', pinyin:'shū', meaning:'suddenly' },
+    { char:'倐', pinyin:'cù', meaning:'urgent' },
+    { char:'們', pinyin:'pǐ', meaning:'compare' },
+    { char:'倒', pinyin:'dào', meaning:'fall' },
+    { char:'倓', pinyin:'tuó', meaning:'many' },
+    { char:'倔', pinyin:'jué', meaning:'stubborn' },
+    { char:'倕', pinyin:'zhǔ', meaning:'artisan' },
+    { char:'倖', pinyin:'xìng', meaning:'luck' },
+    { char:'倗', pinyin:'céng', meaning:'layer' },
+    { char:'倘', pinyin:'tǎng', meaning:'suppose' },
+    { char:'候', pinyin:'chè', meaning:'penetrate' },
+    { char:'倚', pinyin:'yǐ', meaning:'lean' },
+    { char:'倛', pinyin:'zhu', meaning:'unclear' },
+    { char:'倜', pinyin:'tì', meaning:'select' },
+    { char:'倝', pinyin:'hé', meaning:'close' },
+    { char:'倞', pinyin:'jǐng', meaning:'still' },
+    { char:'借', pinyin:'lèi', meaning:'thunder' },
+    { char:'倠', pinyin:'shì', meaning:'matter' },
+    { char:'倡', pinyin:'chàng', meaning:'lead' },
+    { char:'倢', pinyin:'jiǎo', meaning:'beautiful' },
+    { char:'倣', pinyin:'fǎng', meaning:'imitate' },
+    { char:'値', pinyin:'péi', meaning:'accompany' },
+    { char:'倥', pinyin:'kōng', meaning:'empty' },
+    { char:'倦', pinyin:'juàn', meaning:'tired' },
+    { char:'倧', pinyin:'zōng', meaning:'respect' },
+    { char:'倨', pinyin:'jù', meaning:'arrogant' },
+    { char:'倩', pinyin:'qiàn', meaning:'beautiful' },
+    { char:'倪', pinyin:'nǐ', meaning:'edge' },
+    { char:'倫', pinyin:'lún', meaning:'logic' },
+    { char:'倬', pinyin:'zhuó', meaning:'bright' },
+    { char:'倭', pinyin:'wō', meaning:'dwarf' },
+    { char:'倮', pinyin:'luǒ', meaning:'bare' },
+    { char:'倯', pinyin:'cù', meaning:'urge' },
+    { char:'倰', pinyin:'bō', meaning:'wave' },
+    { char:'倱', pinyin:'huó', meaning:'alive' },
+    { char:'倲', pinyin:'hòu', meaning:'thick' },
+    { char:'倳', pinyin:'chù', meaning:'place' },
+    { char:'倴', pinyin:'zhǎi', meaning:'narrow' },
+    { char:'倵', pinyin:'duò', meaning:'dragging' },
+    { char:'倶', pinyin:'jù', meaning:'together' },
+    { char:'倷', pinyin:'tuó', meaning:'many' },
+    { char:'倸', pinyin:'zhuó', meaning:'turbid' },
+    { char:'倹', pinyin:'jiǎn', meaning:'frugal' },
+    { char:'债', pinyin:'zhèng', meaning:'correct' },
+    { char:'倻', pinyin:'yē', meaning:'music' },
+    { char:'值', pinyin:'jié', meaning:'clean' },
+    { char:'倽', pinyin:'duō', meaning:'many' },
+    { char:'倾', pinyin:'qīng', meaning:'lean' },
+    { char:'倿', pinyin:'zhuó', meaning:'turbid' },
+    { char:'偀', pinyin:'píng', meaning:'level' },
+    { char:'偁', pinyin:'chèn', meaning:'suitable' },
+    { char:'偂', pinyin:'bǎn', meaning:'plank' },
+    { char:'偃', pinyin:'yǎn', meaning:'stop' },
+    { char:'偄', pinyin:'huàng', meaning:'vast' },
+    { char:'偅', pinyin:'duō', meaning:'many' },
+    { char:'偆', pinyin:'bǐ', meaning:'compare' },
+    { char:'假', pinyin:'gǔn', meaning:'roll' },
+    { char:'偈', pinyin:'jiè', meaning:'verse' },
+    { char:'偉', pinyin:'wěi', meaning:'great' },
+    { char:'偊', pinyin:'huà', meaning:'slide' },
+    { char:'偋', pinyin:'rèn', meaning:'burden' },
+    { char:'偌', pinyin:'ruò', meaning:'if' },
+    { char:'偍', pinyin:'duō', meaning:'many' },
+    { char:'偎', pinyin:'wēi', meaning:'lean' },
+    { char:'偏', pinyin:'piān', meaning:'lean' },
+    { char:'偐', pinyin:'tuó', meaning:'many' },
+    { char:'偑', pinyin:'bèi', meaning:'prepare' },
+    { char:'偒', pinyin:'huo', meaning:'unclear' },
+    { char:'偓', pinyin:'wò', meaning:'twisted' },
+    { char:'偔', pinyin:'huá', meaning:'slippery' },
+    { char:'偕', pinyin:'xié', meaning:'together' },
+    { char:'偖', pinyin:'yǎ', meaning:'unclear' },
+    { char:'偗', pinyin:'tuó', meaning:'drag' },
+    { char:'偘', pinyin:'duō', meaning:'many' },
+    { char:'偙', pinyin:'duàn', meaning:'break' },
+    { char:'做', pinyin:'huái', meaning:'bosom' },
+    { char:'偛', pinyin:'zhuó', meaning:'turbid' },
+    { char:'停', pinyin:'duō', meaning:'many' },
+    { char:'偝', pinyin:'pèi', meaning:'wear' },
+    { char:'偞', pinyin:'liè', meaning:'cool' },
+    { char:'偟', pinyin:'duō', meaning:'many' },
+    { char:'偠', pinyin:'yào', meaning:'important' },
+    { char:'偡', pinyin:'huó', meaning:'alive' },
+    { char:'偢', pinyin:'qiǎ', meaning:'just' },
+    { char:'偣', pinyin:'huà', meaning:'sudden' },
+    { char:'偤', pinyin:'duō', meaning:'many' },
+    { char:'健', pinyin:'báo', meaning:'thin' },
+    { char:'偦', pinyin:'huì', meaning:'gray' },
+    { char:'偧', pinyin:'duō', meaning:'many' },
+    { char:'偨', pinyin:'chèn', meaning:'bare' },
+    { char:'偩', pinyin:'duō', meaning:'many' },
+    { char:'偪', pinyin:'bī', meaning:'press' },
+    { char:'偫', pinyin:'duō', meaning:'many' },
+    { char:'偬', pinyin:'zǒng', meaning:'altogether' },
+    { char:'偭', pinyin:'miǎn', meaning:'bend' },
+    { char:'偮', pinyin:'duō', meaning:'many' },
+    { char:'偯', pinyin:'duō', meaning:'many' },
+    { char:'偰', pinyin:'xiá', meaning:'slant' },
+    { char:'偱', pinyin:'xún', meaning:'order' },
+    { char:'偲', pinyin:'sī', meaning:'think' },
+    { char:'偳', pinyin:'duō', meaning:'many' },
+    { char:'側', pinyin:'guǎi', meaning:'crutch' },
+    { char:'偵', pinyin:'zhēn', meaning:'spy' },
+    { char:'偶', pinyin:'ǒu', meaning:'pair' },
+    { char:'偷', pinyin:'tōu', meaning:'steal' },
+    { char:'偸', pinyin:'tōu', meaning:'steal' },
+    { char:'偹', pinyin:'bèi', meaning:'prepare' },
+    { char:'偺', pinyin:'duō', meaning:'many' },
+    { char:'偻', pinyin:'lǚ', meaning:'bend' },
+    { char:'偼', pinyin:'duō', meaning:'many' },
+    { char:'偽', pinyin:'wěi', meaning:'false' },
+    { char:'偾', pinyin:'fèn', meaning:'fail' },
+    { char:'偿', pinyin:'cháng', meaning:'repay' },
+    { char:'傀', pinyin:'kuǐ', meaning:'puppet' },
+    { char:'傁', pinyin:'duō', meaning:'many' },
+    { char:'傂', pinyin:'bó', meaning:'count' },
+    { char:'傃', pinyin:'duō', meaning:'many' },
+    { char:'傄', pinyin:'huo', meaning:'unclear' },
+    { char:'傅', pinyin:'fù', meaning:'assist' },
+    { char:'傆', pinyin:'duō', meaning:'many' },
+    { char:'傇', pinyin:'duō', meaning:'many' },
+    { char:'傈', pinyin:'lì', meaning:'ethnic' },
+    { char:'傉', pinyin:'duō', meaning:'many' },
+    { char:'傊', pinyin:'duō', meaning:'many' },
+    { char:'傋', pinyin:'tuó', meaning:'many' },
+    { char:'傌', pinyin:'duō', meaning:'many' },
+    { char:'傍', pinyin:'páng', meaning:'beside' },
+    { char:'傎', pinyin:'duō', meaning:'many' },
+    { char:'傏', pinyin:'jiàn', meaning:'see' },
+    { char:'傐', pinyin:'duō', meaning:'many' },
+    { char:'傑', pinyin:'jié', meaning:'outstanding' },
+    { char:'傒', pinyin:'duō', meaning:'many' },
+    { char:'傓', pinyin:'duō', meaning:'many' },
+    { char:'傔', pinyin:'jiàn', meaning:'guard' },
+    { char:'傕', pinyin:'duō', meaning:'many' },
+    { char:'傖', pinyin:'duō', meaning:'many' },
+    { char:'傗', pinyin:'duō', meaning:'many' },
+    { char:'傘', pinyin:'sǎn', meaning:'umbrella' },
+    { char:'備', pinyin:'duō', meaning:'many' },
+    { char:'傚', pinyin:'xiào', meaning:'learn' },
+    { char:'傛', pinyin:'duō', meaning:'many' },
+    { char:'傜', pinyin:'duō', meaning:'many' },
+    { char:'傝', pinyin:'huo', meaning:'unclear' },
+    { char:'傞', pinyin:'duō', meaning:'many' },
+    { char:'傟', pinyin:'duō', meaning:'many' },
+    { char:'傠', pinyin:'duō', meaning:'many' },
+    { char:'傡', pinyin:'duō', meaning:'many' },
+    { char:'傢', pinyin:'jiā', meaning:'home' },
+    { char:'傣', pinyin:'dǎi', meaning:'ethnic' },
+    { char:'傤', pinyin:'duō', meaning:'many' },
+    { char:'傥', pinyin:'tǎng', meaning:'suppose' },
+    { char:'傦', pinyin:'duō', meaning:'many' },
+    { char:'傧', pinyin:'bīng', meaning:'guest' },
+    { char:'储', pinyin:'duō', meaning:'many' },
+    { char:'傩', pinyin:'nuó', meaning:'exorcise' },
+    { char:'傪', pinyin:'duō', meaning:'many' },
+    { char:'傫', pinyin:'duō', meaning:'many' },
+    { char:'催', pinyin:'duō', meaning:'many' },
+    { char:'傭', pinyin:'yōng', meaning:'hire' },
+    { char:'傮', pinyin:'duō', meaning:'many' },
+    { char:'傯', pinyin:'duō', meaning:'many' },
+    { char:'傰', pinyin:'duō', meaning:'many' },
+    { char:'傱', pinyin:'duō', meaning:'many' },
+    { char:'傲', pinyin:'ào', meaning:'proud' },
+    { char:'傳', pinyin:'zhuàn', meaning:'transmit' },
+    { char:'傴', pinyin:'yǔ', meaning:'bend' },
+    { char:'債', pinyin:'duō', meaning:'many' },
+    { char:'傶', pinyin:'duō', meaning:'many' },
+    { char:'傷', pinyin:'shāng', meaning:'hurt' },
+    { char:'傸', pinyin:'duō', meaning:'many' },
+    { char:'傹', pinyin:'duō', meaning:'many' },
+    { char:'傺', pinyin:'duō', meaning:'many' },
+    { char:'傻', pinyin:'shǎ', meaning:'stupid' },
+    { char:'傼', pinyin:'duō', meaning:'many' },
+    { char:'傽', pinyin:'duō', meaning:'many' },
+    { char:'傾', pinyin:'qīng', meaning:'lean' },
+    { char:'傿', pinyin:'duō', meaning:'many' },
+    { char:'僀', pinyin:'duō', meaning:'many' },
+    { char:'僁', pinyin:'duō', meaning:'many' },
+    { char:'僂', pinyin:'lǚ', meaning:'bend' },
+    { char:'僃', pinyin:'duō', meaning:'many' },
+    { char:'僄', pinyin:'duō', meaning:'many' },
+    { char:'僅', pinyin:'jǐn', meaning:'only' },
+    { char:'僆', pinyin:'duō', meaning:'many' },
+    { char:'僇', pinyin:'lù', meaning:'abuse' },
+    { char:'僈', pinyin:'duō', meaning:'many' },
+    { char:'僉', pinyin:'qiān', meaning:'all' },
+    { char:'僊', pinyin:'xiān', meaning:'immortal' },
+    { char:'僋', pinyin:'duō', meaning:'many' },
+    { char:'僌', pinyin:'duō', meaning:'many' },
+    { char:'働', pinyin:'duō', meaning:'many' },
+    { char:'僎', pinyin:'duō', meaning:'many' },
+    { char:'像', pinyin:'duō', meaning:'many' },
+    { char:'僐', pinyin:'duō', meaning:'many' },
+    { char:'僑', pinyin:'duō', meaning:'many' },
+    { char:'僒', pinyin:'duō', meaning:'many' },
+    { char:'僓', pinyin:'duō', meaning:'many' },
+    { char:'僔', pinyin:'duō', meaning:'many' },
+    { char:'僕', pinyin:'pú', meaning:'servant' },
+    { char:'僖', pinyin:'xī', meaning:'happy' },
+    { char:'僗', pinyin:'duō', meaning:'many' },
+    { char:'僘', pinyin:'duō', meaning:'many' },
+    { char:'僙', pinyin:'duō', meaning:'many' },
+    { char:'僚', pinyin:'liáo', meaning:'colleague' },
+    { char:'僛', pinyin:'duō', meaning:'many' },
+    { char:'僜', pinyin:'duō', meaning:'many' },
+    { char:'僝', pinyin:'duō', meaning:'many' },
+    { char:'僞', pinyin:'wěi', meaning:'false' },
+    { char:'僟', pinyin:'jǐ', meaning:'few' },
+    { char:'僠', pinyin:'duō', meaning:'many' },
+    { char:'僡', pinyin:'duō', meaning:'many' },
+    { char:'僢', pinyin:'duō', meaning:'many' },
+    { char:'僣', pinyin:'jiàn', meaning:'usurp' },
+    { char:'僤', pinyin:'duō', meaning:'many' },
+    { char:'僥', pinyin:'jiǎo', meaning:'lucky' },
+    { char:'僦', pinyin:'jiù', meaning:'rent' },
+    { char:'僧', pinyin:'sēng', meaning:'monk' },
+    { char:'僨', pinyin:'fèn', meaning:'fail' },
+    { char:'僩', pinyin:'duō', meaning:'many' },
+    { char:'僪', pinyin:'duō', meaning:'many' },
+    { char:'僫', pinyin:'duō', meaning:'many' },
+    { char:'僬', pinyin:'jiào', meaning:'tall' },
+    { char:'僭', pinyin:'jiàn', meaning:'usurp' },
+    { char:'僮', pinyin:'tóng', meaning:'boy' },
+    { char:'僯', pinyin:'duō', meaning:'many' },
+    { char:'僰', pinyin:'duō', meaning:'many' },
+    { char:'僱', pinyin:'gù', meaning:'hire' },
+    { char:'僲', pinyin:'duō', meaning:'many' },
+    { char:'僳', pinyin:'duō', meaning:'many' },
+    { char:'僴', pinyin:'duō', meaning:'many' },
+    { char:'僵', pinyin:'jiāng', meaning:'stiff' },
+    { char:'僶', pinyin:'duō', meaning:'many' },
+    { char:'僷', pinyin:'duō', meaning:'many' },
+    { char:'僸', pinyin:'duō', meaning:'many' },
+    { char:'價', pinyin:'duō', meaning:'many' },
+    { char:'僺', pinyin:'duō', meaning:'many' },
+    { char:'僻', pinyin:'pì', meaning:'remote' },
+    { char:'僼', pinyin:'duō', meaning:'many' },
+    { char:'僽', pinyin:'duō', meaning:'many' },
+    { char:'僾', pinyin:'duō', meaning:'many' },
+    { char:'僿', pinyin:'duō', meaning:'many' },
+    { char:'儀', pinyin:'yí', meaning:'ceremony' },
+    { char:'儁', pinyin:'duō', meaning:'many' },
+    { char:'儂', pinyin:'nóng', meaning:'we' },
+    { char:'儃', pinyin:'duō', meaning:'many' },
+    { char:'億', pinyin:'duō', meaning:'many' },
+    { char:'儅', pinyin:'duō', meaning:'many' },
+    { char:'儆', pinyin:'jǐng', meaning:'warn' },
+    { char:'儇', pinyin:'duō', meaning:'many' },
+    { char:'儈', pinyin:'kuài', meaning:'broker' },
+    { char:'儉', pinyin:'jiǎn', meaning:'frugal' },
+    { char:'儊', pinyin:'duō', meaning:'many' },
+    { char:'儋', pinyin:'dān', meaning:'burden' },
+    { char:'儌', pinyin:'duō', meaning:'many' },
+    { char:'儍', pinyin:'duō', meaning:'many' },
+    { char:'儎', pinyin:'duō', meaning:'many' },
+    { char:'儏', pinyin:'duō', meaning:'many' },
+    { char:'儐', pinyin:'bīng', meaning:'guest' },
+    { char:'儑', pinyin:'duō', meaning:'many' },
+    { char:'儒', pinyin:'rú', meaning:'scholar' },
+    { char:'儓', pinyin:'duō', meaning:'many' },
+    { char:'儔', pinyin:'chóu', meaning:'pair' },
+    { char:'儕', pinyin:'chái', meaning:'companion' },
+    { char:'儖', pinyin:'duō', meaning:'many' },
+    { char:'儗', pinyin:'yǐ', meaning:'compare' },
+    { char:'儘', pinyin:'jìn', meaning:'only' },
+    { char:'儙', pinyin:'duō', meaning:'many' },
+    { char:'儚', pinyin:'miǎo', meaning:'fleeting' },
+    { char:'儛', pinyin:'duō', meaning:'many' },
+    { char:'儜', pinyin:'duō', meaning:'many' },
+    { char:'儝', pinyin:'duō', meaning:'many' },
+    { char:'儞', pinyin:'duō', meaning:'many' },
+    { char:'償', pinyin:'duō', meaning:'many' },
+    { char:'儠', pinyin:'duō', meaning:'many' },
+    { char:'儡', pinyin:'lěi', meaning:'puppet' },
+    { char:'儢', pinyin:'duō', meaning:'many' },
+    { char:'儣', pinyin:'duō', meaning:'many' },
+    { char:'儤', pinyin:'duō', meaning:'many' },
+    { char:'儥', pinyin:'duō', meaning:'many' },
+    { char:'儦', pinyin:'duō', meaning:'many' },
+    { char:'儧', pinyin:'duō', meaning:'many' },
+    { char:'儨', pinyin:'duō', meaning:'many' },
+    { char:'儩', pinyin:'duō', meaning:'many' },
+    { char:'優', pinyin:'duō', meaning:'many' },
+    { char:'儫', pinyin:'duō', meaning:'many' },
+    { char:'儬', pinyin:'duō', meaning:'many' },
+    { char:'儭', pinyin:'duō', meaning:'many' },
+    { char:'儮', pinyin:'duō', meaning:'many' },
+    { char:'儯', pinyin:'duō', meaning:'many' },
+    { char:'儰', pinyin:'duō', meaning:'many' },
+    { char:'儱', pinyin:'duō', meaning:'many' },
+    { char:'儲', pinyin:'chǔ', meaning:'store' },
+    { char:'儳', pinyin:'duō', meaning:'many' },
+    { char:'儴', pinyin:'duō', meaning:'many' },
+    { char:'儵', pinyin:'duō', meaning:'many' },
+    { char:'儶', pinyin:'duō', meaning:'many' },
+    { char:'儷', pinyin:'lì', meaning:'pair' },
+    { char:'儸', pinyin:'duō', meaning:'many' },
+    { char:'儹', pinyin:'duō', meaning:'many' },
+    { char:'儺', pinyin:'nuó', meaning:'exorcise' },
+    { char:'儻', pinyin:'duō', meaning:'many' },
+    { char:'儼', pinyin:'yǎn', meaning:'solemn' },
+    { char:'儽', pinyin:'duō', meaning:'many' },
+    { char:'儾', pinyin:'duō', meaning:'many' },
+    { char:'儿', pinyin:'ér', meaning:'son' },
+    { char:'兀', pinyin:'wù', meaning:'outstanding' },
+    { char:'允', pinyin:'duō', meaning:'many' },
+    { char:'兂', pinyin:'duō', meaning:'many' },
+    { char:'元', pinyin:'duō', meaning:'many' },
+    { char:'兄', pinyin:'xiōng', meaning:'brother' },
+    { char:'充', pinyin:'duō', meaning:'many' },
+    { char:'兆', pinyin:'zhào', meaning:'omen' },
+    { char:'兇', pinyin:'xiōng', meaning:'fierce' },
+    { char:'先', pinyin:'xiān', meaning:'first' },
+    { char:'光', pinyin:'duō', meaning:'many' },
+    { char:'兊', pinyin:'duō', meaning:'many' },
+    { char:'克', pinyin:'duō', meaning:'many' },
+    { char:'兌', pinyin:'duì', meaning:'exchange' },
+    { char:'免', pinyin:'duō', meaning:'many' },
+    { char:'兎', pinyin:'tù', meaning:'rabbit' },
+    { char:'兏', pinyin:'duō', meaning:'many' },
+    { char:'児', pinyin:'duō', meaning:'many' },
+    { char:'兑', pinyin:'duì', meaning:'exchange' },
+    { char:'兒', pinyin:'ér', meaning:'son' },
+    { char:'兓', pinyin:'duō', meaning:'many' },
+    { char:'兔', pinyin:'tù', meaning:'rabbit' },
+    { char:'兕', pinyin:'sì', meaning:'rhinoceros' },
+    { char:'兖', pinyin:'yǎn', meaning:'province' },
+    { char:'兗', pinyin:'yǎn', meaning:'province' },
+    { char:'兘', pinyin:'duō', meaning:'many' },
+    { char:'兙', pinyin:'duō', meaning:'many' },
+    { char:'党', pinyin:'duō', meaning:'many' },
+    { char:'兛', pinyin:'duō', meaning:'many' },
+    { char:'兜', pinyin:'dōu', meaning:'pocket' },
+    { char:'兝', pinyin:'duō', meaning:'many' },
+    { char:'兞', pinyin:'duō', meaning:'many' },
+    { char:'兟', pinyin:'duō', meaning:'many' },
+    { char:'兠', pinyin:'duō', meaning:'many' },
+    { char:'兡', pinyin:'duō', meaning:'many' },
+    { char:'兢', pinyin:'jīng', meaning:'careful' },
+    { char:'兣', pinyin:'duō', meaning:'many' },
+    { char:'兤', pinyin:'duō', meaning:'many' },
+    { char:'入', pinyin:'duō', meaning:'many' },
+    { char:'兦', pinyin:'duō', meaning:'many' },
+    { char:'內', pinyin:'duō', meaning:'many' },
+    { char:'全', pinyin:'duō', meaning:'many' },
+    { char:'兩', pinyin:'liǎng', meaning:'two' },
+    { char:'兪', pinyin:'yú', meaning:'yes' },
+    { char:'八', pinyin:'fū', meaning:'man' },
+    { char:'公', pinyin:'duō', meaning:'many' },
+    { char:'六', pinyin:'duō', meaning:'many' },
+    { char:'兮', pinyin:'xī', meaning:'particle' },
+    { char:'兯', pinyin:'duō', meaning:'many' },
+    { char:'兰', pinyin:'lán', meaning:'orchid' },
+    { char:'共', pinyin:'duō', meaning:'many' },
+    { char:'兲', pinyin:'duō', meaning:'many' },
+    { char:'关', pinyin:'duō', meaning:'many' },
+    { char:'兴', pinyin:'xīng', meaning:'flourish' },
+    { char:'兵', pinyin:'bīng', meaning:'soldier' },
+    { char:'其', pinyin:'duō', meaning:'many' },
+    { char:'具', pinyin:'duō', meaning:'many' },
+    { char:'典', pinyin:'duō', meaning:'many' },
+    { char:'兹', pinyin:'zī', meaning:'this' },
+    { char:'兺', pinyin:'duō', meaning:'many' },
+    { char:'养', pinyin:'duō', meaning:'many' },
+    { char:'兼', pinyin:'jiān', meaning:'concurrently' },
+    { char:'兽', pinyin:'shòu', meaning:'beast' },
+    { char:'兾', pinyin:'duō', meaning:'many' },
+    { char:'兿', pinyin:'duō', meaning:'many' },
+    { char:'冀', pinyin:'jì', meaning:'hope' },
+    { char:'冁', pinyin:'duō', meaning:'many' },
+    { char:'冂', pinyin:'jiōng', meaning:'box' },
+    { char:'冃', pinyin:'duō', meaning:'many' },
+    { char:'冄', pinyin:'duō', meaning:'many' },
+    { char:'内', pinyin:'duō', meaning:'many' },
+    { char:'円', pinyin:'duō', meaning:'many' },
+    { char:'冇', pinyin:'mǎo', meaning:'have not' },
+    { char:'冈', pinyin:'gāng', meaning:'ridge' },
+    { char:'冉', pinyin:'rǎn', meaning:'go' },
+    { char:'冊', pinyin:'cè', meaning:'book' },
+    { char:'冋', pinyin:'jiòng', meaning:'box' },
+    { char:'册', pinyin:'duō', meaning:'many' },
+    { char:'再', pinyin:'duō', meaning:'many' },
+    { char:'冎', pinyin:'duō', meaning:'many' },
+    { char:'冏', pinyin:'jiǒng', meaning:'bright' },
+    { char:'冐', pinyin:'duō', meaning:'many' },
+    { char:'冑', pinyin:'zhòu', meaning:'helmet' },
+    { char:'冒', pinyin:'mào', meaning:'risk' },
+    { char:'冓', pinyin:'gòu', meaning:'cross' },
+    { char:'冔', pinyin:'duō', meaning:'many' },
+    { char:'冕', pinyin:'miǎn', meaning:'crown' },
+    { char:'冖', pinyin:'mì', meaning:'cover' },
+    { char:'冗', pinyin:'rǒng', meaning:'redundant' },
+    { char:'冘', pinyin:'duō', meaning:'many' },
+    { char:'写', pinyin:'duō', meaning:'many' },
+    { char:'冚', pinyin:'hǎm', meaning:'cover' },
+    { char:'军', pinyin:'duō', meaning:'many' },
+    { char:'农', pinyin:'duō', meaning:'many' },
+    { char:'冝', pinyin:'yí', meaning:'suitable' },
+    { char:'冞', pinyin:'duō', meaning:'many' },
+    { char:'冟', pinyin:'duō', meaning:'many' },
+    { char:'冠', pinyin:'guān', meaning:'crown' },
+    { char:'冡', pinyin:'duō', meaning:'many' },
+    { char:'冢', pinyin:'zhǒng', meaning:'mound' },
+    { char:'冣', pinyin:'zuì', meaning:'most' },
+    { char:'冤', pinyin:'yuān', meaning:'wrong' },
+    { char:'冥', pinyin:'míng', meaning:'dark' },
+    { char:'冦', pinyin:'kòu', meaning:'bandit' },
+    { char:'冧', pinyin:'duō', meaning:'many' },
+    { char:'冨', pinyin:'fù', meaning:'wealth' },
+    { char:'冩', pinyin:'xiě', meaning:'write' },
+    { char:'冪', pinyin:'mì', meaning:'cover' },
+    { char:'冫', pinyin:'bīng', meaning:'ice' },
+    { char:'冬', pinyin:'dōng', meaning:'winter' },
+    { char:'冭', pinyin:'duō', meaning:'many' },
+    { char:'冮', pinyin:'duō', meaning:'many' },
+    { char:'冯', pinyin:'féng', meaning:'surname' },
+    { char:'冰', pinyin:'bīng', meaning:'ice' },
+    { char:'冱', pinyin:'duō', meaning:'many' },
+    { char:'冲', pinyin:'chōng', meaning:'rush' },
+    { char:'决', pinyin:'duō', meaning:'many' },
+    { char:'冴', pinyin:'duō', meaning:'many' },
+    { char:'况', pinyin:'duō', meaning:'many' },
+    { char:'冶', pinyin:'yě', meaning:'smelt' },
+    { char:'冷', pinyin:'lěng', meaning:'cold' },
+    { char:'冸', pinyin:'duō', meaning:'many' },
+    { char:'冹', pinyin:'duō', meaning:'many' },
+    { char:'冺', pinyin:'duō', meaning:'many' },
+    { char:'冻', pinyin:'dòng', meaning:'freeze' },
+    { char:'冼', pinyin:'xiǎn', meaning:'clean' },
+    { char:'冽', pinyin:'liè', meaning:'cold' },
+    { char:'冾', pinyin:'duō', meaning:'many' },
+    { char:'冿', pinyin:'duō', meaning:'many' },
+    { char:'净', pinyin:'jìng', meaning:'clean' },
+    { char:'凁', pinyin:'duō', meaning:'many' },
+    { char:'凂', pinyin:'duō', meaning:'many' },
+    { char:'凃', pinyin:'tú', meaning:'smear' },
+    { char:'凄', pinyin:'qī', meaning:'desolate' },
+    { char:'凅', pinyin:'duō', meaning:'many' },
+    { char:'准', pinyin:'duō', meaning:'many' },
+    { char:'凇', pinyin:'sōng', meaning:'rime' },
+    { char:'凈', pinyin:'jìng', meaning:'clean' },
+    { char:'凉', pinyin:'liáng', meaning:'cool' },
+    { char:'凊', pinyin:'duō', meaning:'many' },
+    { char:'凋', pinyin:'diāo', meaning:'wither' },
+    { char:'凌', pinyin:'líng', meaning:'freeze' },
+    { char:'凎', pinyin:'duō', meaning:'many' },
+    { char:'减', pinyin:'jiǎn', meaning:'reduce' },
+    { char:'凐', pinyin:'duō', meaning:'many' },
+    { char:'凑', pinyin:'còu', meaning:'gather' },
+    { char:'凒', pinyin:'duō', meaning:'many' },
+    { char:'凓', pinyin:'duō', meaning:'many' },
+    { char:'凔', pinyin:'duō', meaning:'many' },
+    { char:'凕', pinyin:'duō', meaning:'many' },
+    { char:'凖', pinyin:'duō', meaning:'many' },
+    { char:'凗', pinyin:'duō', meaning:'many' },
+    { char:'凘', pinyin:'duō', meaning:'many' },
+    { char:'凙', pinyin:'duō', meaning:'many' },
+    { char:'凚', pinyin:'duō', meaning:'many' },
+    { char:'凛', pinyin:'lǐn', meaning:'stern' },
+    { char:'凜', pinyin:'lǐn', meaning:'stern' },
+    { char:'凝', pinyin:'níng', meaning:'congeal' },
+    { char:'凞', pinyin:'duō', meaning:'many' },
+    { char:'凟', pinyin:'dú', meaning:'insult' },
+    { char:'几', pinyin:'duō', meaning:'many' },
+    { char:'凡', pinyin:'fán', meaning:'ordinary' },
+    { char:'凢', pinyin:'duō', meaning:'many' },
+    { char:'凣', pinyin:'duō', meaning:'many' },
+    { char:'凤', pinyin:'fèng', meaning:'phoenix' },
+    { char:'凥', pinyin:'duō', meaning:'many' },
+    { char:'処', pinyin:'duō', meaning:'many' },
+    { char:'凧', pinyin:'duō', meaning:'many' },
+    { char:'凨', pinyin:'duō', meaning:'many' },
+    { char:'凩', pinyin:'duō', meaning:'many' },
+    { char:'凪', pinyin:'duō', meaning:'many' },
+    { char:'凫', pinyin:'fú', meaning:'duck' },
+    { char:'凬', pinyin:'duō', meaning:'many' },
+    { char:'凭', pinyin:'píng', meaning:'rely' },
+    { char:'凮', pinyin:'duō', meaning:'many' },
+    { char:'凯', pinyin:'kǎi', meaning:'triumph' },
+    { char:'凰', pinyin:'huáng', meaning:'phoenix' },
+    { char:'凱', pinyin:'kǎi', meaning:'triumph' },
+    { char:'凲', pinyin:'duō', meaning:'many' },
+    { char:'凳', pinyin:'děng', meaning:'stool' },
+    { char:'凴', pinyin:'duō', meaning:'many' },
+    { char:'凵', pinyin:'kǎn', meaning:'indent' },
+    { char:'凶', pinyin:'xiōng', meaning:'fierce' },
+    { char:'凷', pinyin:'duō', meaning:'many' },
+    { char:'凸', pinyin:'tū', meaning:'convex' },
+    { char:'凹', pinyin:'āo', meaning:'concave' },
+    { char:'出', pinyin:'duō', meaning:'many' },
+    { char:'出', pinyin:'chū', meaning:'exit' },
+    { char:'凼', pinyin:'duō', meaning:'many' },
+    { char:'函', pinyin:'duō', meaning:'many' },
+    { char:'凾', pinyin:'duō', meaning:'many' },
+    { char:'凿', pinyin:'záo', meaning:'chisel' },
+    { char:'刀', pinyin:'dāo', meaning:'knife' },
+    { char:'刁', pinyin:'diāo', meaning:'wicked' },
+    { char:'刂', pinyin:'duō', meaning:'many' },
+    { char:'刃', pinyin:'rèn', meaning:'edge' },
+    { char:'刄', pinyin:'duō', meaning:'many' },
+    { char:'刅', pinyin:'duō', meaning:'many' },
+    { char:'分', pinyin:'fēn', meaning:'divide' },
+    { char:'切', pinyin:'duō', meaning:'many' },
+    { char:'刈', pinyin:'yì', meaning:'cut' },
+    { char:'刉', pinyin:'duō', meaning:'many' },
+    { char:'刊', pinyin:'kān', meaning:'publish' },
+    { char:'刋', pinyin:'duō', meaning:'many' },
+    { char:'刌', pinyin:'duō', meaning:'many' },
+    { char:'刍', pinyin:'chú', meaning:'fodder' },
+    { char:'刎', pinyin:'wěn', meaning:'cut' },
+    { char:'刏', pinyin:'duō', meaning:'many' },
+    { char:'刐', pinyin:'duō', meaning:'many' },
+    { char:'划', pinyin:'huá', meaning:'paddle' },
+    { char:'划', pinyin:'duō', meaning:'many' },
+    { char:'刓', pinyin:'duō', meaning:'many' },
+    { char:'刔', pinyin:'duō', meaning:'many' },
+    { char:'刕', pinyin:'duō', meaning:'many' },
+    { char:'刖', pinyin:'yuè', meaning:'cut' },
+    { char:'列', pinyin:'liè', meaning:'line' },
+    { char:'刘', pinyin:'liú', meaning:'surname' },
+    { char:'则', pinyin:'zé', meaning:'rule' },
+    { char:'刚', pinyin:'gāng', meaning:'rigid' },
+    { char:'创', pinyin:'chuàng', meaning:'create' },
+    { char:'刜', pinyin:'duō', meaning:'many' },
+    { char:'初', pinyin:'chū', meaning:'beginning' },
+    { char:'刞', pinyin:'duō', meaning:'many' },
+    { char:'刟', pinyin:'duō', meaning:'many' },
+    { char:'删', pinyin:'shān', meaning:'delete' },
+    { char:'刡', pinyin:'duō', meaning:'many' },
+    { char:'刢', pinyin:'duō', meaning:'many' },
+    { char:'刣', pinyin:'duō', meaning:'many' },
+    { char:'判', pinyin:'duō', meaning:'many' },
+    { char:'別', pinyin:'duō', meaning:'many' },
+    { char:'刦', pinyin:'jié', meaning:'rob' },
+    { char:'刧', pinyin:'duō', meaning:'many' },
+    { char:'刨', pinyin:'páo', meaning:'plane' },
+    { char:'利', pinyin:'duō', meaning:'many' },
+    { char:'刪', pinyin:'shān', meaning:'delete' },
+    { char:'别', pinyin:'duō', meaning:'many' },
+    { char:'刬', pinyin:'duō', meaning:'many' },
+    { char:'刭', pinyin:'duō', meaning:'many' },
+    { char:'刮', pinyin:'guā', meaning:'scrape' },
+    { char:'刯', pinyin:'duō', meaning:'many' },
+    { char:'到', pinyin:'duō', meaning:'many' },
+    { char:'刱', pinyin:'duō', meaning:'many' },
+    { char:'刲', pinyin:'duō', meaning:'many' },
+    { char:'刳', pinyin:'kū', meaning:'hollow' },
+    { char:'刴', pinyin:'duō', meaning:'many' },
+    { char:'刵', pinyin:'duō', meaning:'many' },
+    { char:'制', pinyin:'duō', meaning:'many' },
+    { char:'刷', pinyin:'shuā', meaning:'brush' },
+    { char:'券', pinyin:'duō', meaning:'many' },
+    { char:'刹', pinyin:'chà', meaning:'temple' },
+    { char:'刺', pinyin:'cì', meaning:'thorn' },
+    { char:'刻', pinyin:'kè', meaning:'carve' },
+    { char:'刼', pinyin:'duō', meaning:'many' },
+    { char:'刽', pinyin:'guì', meaning:'executioner' },
+    { char:'刾', pinyin:'duō', meaning:'many' },
+    { char:'刿', pinyin:'guì', meaning:'stab' },
+    { char:'剀', pinyin:'duō', meaning:'many' },
+    { char:'剁', pinyin:'duò', meaning:'chop' },
+    { char:'剂', pinyin:'jì', meaning:'dose' },
+    { char:'剃', pinyin:'tì', meaning:'shave' },
+    { char:'剄', pinyin:'duō', meaning:'many' },
+    { char:'剅', pinyin:'duō', meaning:'many' },
+    { char:'剆', pinyin:'duō', meaning:'many' },
+    { char:'則', pinyin:'zé', meaning:'rule' },
+    { char:'剈', pinyin:'duō', meaning:'many' },
+    { char:'剉', pinyin:'cuò', meaning:'file' },
+    { char:'削', pinyin:'duō', meaning:'many' },
+    { char:'削', pinyin:'xuē', meaning:'carve' },
+    { char:'剌', pinyin:'duō', meaning:'many' },
+    { char:'前', pinyin:'qián', meaning:'before' },
+    { char:'剎', pinyin:'chà', meaning:'temple' },
+    { char:'剏', pinyin:'duō', meaning:'many' },
+    { char:'剐', pinyin:'guā', meaning:'scrape' },
+    { char:'剑', pinyin:'jiàn', meaning:'sword' },
+    { char:'剒', pinyin:'duō', meaning:'many' },
+    { char:'剓', pinyin:'duō', meaning:'many' },
+    { char:'剔', pinyin:'tī', meaning:'pick' },
+    { char:'剕', pinyin:'duō', meaning:'many' },
+    { char:'剖', pinyin:'pōu', meaning:'split' },
+    { char:'剗', pinyin:'duō', meaning:'many' },
+    { char:'剘', pinyin:'duō', meaning:'many' },
+    { char:'剙', pinyin:'duō', meaning:'many' },
+    { char:'剚', pinyin:'duō', meaning:'many' },
+    { char:'剛', pinyin:'gāng', meaning:'rigid' },
+    { char:'剜', pinyin:'wā', meaning:'dig' },
+    { char:'剝', pinyin:'pī', meaning:'peel' },
+    { char:'剞', pinyin:'duō', meaning:'many' },
+    { char:'剟', pinyin:'duō', meaning:'many' },
+    { char:'剠', pinyin:'duō', meaning:'many' },
+    { char:'剡', pinyin:'yán', meaning:'sharp' },
+    { char:'剢', pinyin:'duō', meaning:'many' },
+    { char:'剣', pinyin:'duō', meaning:'many' },
+    { char:'剤', pinyin:'duō', meaning:'many' },
+    { char:'剥', pinyin:'bō', meaning:'peel' },
+    { char:'剦', pinyin:'duō', meaning:'many' },
+    { char:'剧', pinyin:'jù', meaning:'drama' },
+    { char:'剨', pinyin:'duō', meaning:'many' },
+    { char:'剩', pinyin:'shèng', meaning:'remain' },
+    { char:'剪', pinyin:'jiǎn', meaning:'scissors' },
+    { char:'剫', pinyin:'duō', meaning:'many' },
+    { char:'剬', pinyin:'duō', meaning:'many' },
+    { char:'剭', pinyin:'duō', meaning:'many' },
+    { char:'剮', pinyin:'duō', meaning:'many' },
+    { char:'副', pinyin:'duō', meaning:'many' },
+    { char:'剰', pinyin:'duō', meaning:'many' },
+    { char:'剱', pinyin:'duō', meaning:'many' },
+    { char:'割', pinyin:'duō', meaning:'many' },
+    { char:'剳', pinyin:'duō', meaning:'many' },
+    { char:'剴', pinyin:'duō', meaning:'many' },
+    { char:'創', pinyin:'duō', meaning:'many' },
+    { char:'剶', pinyin:'duō', meaning:'many' },
+    { char:'剷', pinyin:'duō', meaning:'many' },
+    { char:'剸', pinyin:'duō', meaning:'many' },
+    { char:'剹', pinyin:'duō', meaning:'many' },
+    { char:'剺', pinyin:'duō', meaning:'many' },
+    { char:'剻', pinyin:'duō', meaning:'many' },
+    { char:'剼', pinyin:'duō', meaning:'many' },
+    { char:'剽', pinyin:'piāo', meaning:'fast' },
+    { char:'剾', pinyin:'duō', meaning:'many' },
+    { char:'剿', pinyin:'jiāo', meaning:'suppress' },
+    { char:'割', pinyin:'gē', meaning:'cut' },
+    { char:'剁', pinyin:'duò', meaning:'chop' },
+    { char:'剂', pinyin:'jì', meaning:'dose' },
+    { char:'剃', pinyin:'tì', meaning:'shave' },
+    { char:'剄', pinyin:'duō', meaning:'many' },
+    { char:'剅', pinyin:'duō', meaning:'many' }
+  ];
+
+  let currentChar = characters[0];
+  let isTraceActive = false;
+
+  // --- CANVAS ENGINE ---
+  const setupCanvas = () => {
+    const canvas = document.getElementById('drawingCanvas');
+    const gCanvas = document.getElementById('guideCanvas');
+    const ctx = canvas.getContext('2d');
+    const gCtx = gCanvas.getContext('2d');
+    let isDrawing = false, strokes = [], currentStroke = [], redoStack = [];
+    let lastX, lastY, lastW, lastTime;
+
+    const resize = () => {
+      const parent = canvas.parentElement;
+      const dpr = window.devicePixelRatio || 1;
+      const size = parent.clientWidth;
+      canvas.width = size * dpr; canvas.height = size * dpr;
+      gCanvas.width = size * dpr; gCanvas.height = size * dpr;
+      canvas.style.width = size + 'px'; canvas.style.height = size + 'px';
+      ctx.scale(dpr, dpr); gCtx.scale(dpr, dpr);
+      redraw();
+    };
+
+    const redraw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#000';
+      strokes.forEach(s => {
+        if (s.length < 2) return;
+        for (let i = 1; i < s.length; i++) {
+          const p1 = s[i-1], p2 = s[i];
+          const dist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+          const steps = Math.ceil(dist * 2.5);
+          for (let st = 0; st <= steps; st++) {
+            const t = st / steps;
+            const x = p1.x + (p2.x - p1.x) * t;
+            const y = p1.y + (p2.y - p1.y) * t;
+            const w = p1.w + (p2.w - p1.w) * t;
+            ctx.beginPath(); ctx.arc(x, y, w / 2, 0, Math.PI * 2); ctx.fill();
+          }
+        }
+      });
+      drawGuide();
+    };
+
+    const drawGuide = () => {
+      gCtx.clearRect(0, 0, gCanvas.width, gCanvas.height);
+      if (!isTraceActive) return;
+      const s = gCanvas.width / (window.devicePixelRatio || 1);
+      gCtx.font = `400 ${s * 0.72}px "Noto Serif SC"`;
+      gCtx.fillStyle = 'rgba(0,0,0,0.55)'; 
+      gCtx.textAlign = 'center'; gCtx.textBaseline = 'middle';
+      gCtx.fillText(currentChar.char, s/2, s/2);
+    };
+
+    const getPos = (e) => {
+      const r = canvas.getBoundingClientRect();
+      const cx = (e.touches ? e.touches[0].clientX : e.clientX);
+      const cy = (e.touches ? e.touches[0].clientY : e.clientY);
+      return { x: cx - r.left, y: cy - r.top, t: Date.now() };
+    };
+
+    canvas.addEventListener('pointerdown', (e) => {
+      isDrawing = true; const p = getPos(e);
+      lastX = p.x; lastY = p.y; lastTime = p.t;
+      lastW = 22; // JUICY BOLD START
+      currentStroke = [{ x: p.x, y: p.y, w: lastW }];
+      ctx.fillStyle = '#000';
+      ctx.beginPath(); ctx.arc(p.x, p.y, lastW/2, 0, Math.PI*2); ctx.fill();
+    });
+
+    canvas.addEventListener('pointermove', (e) => {
+      if (!isDrawing) return;
+      const p = getPos(e);
+      const d = Math.hypot(p.x - lastX, p.y - lastY);
+      const v = (p.t - lastTime) > 0 ? d / (p.t - lastTime) : 0;
+      let targetW = Math.max(1.5, 20 - (v * 10)); 
+      const cw = lastW * 0.3 + targetW * 0.7;
+      const pPrev = currentStroke[currentStroke.length - 1], pNew = { x: p.x, y: p.y, w: cw };
+      
+      // Draw segment
+      const dist = Math.hypot(pNew.x - pPrev.x, pNew.y - pPrev.y);
+      const steps = Math.ceil(dist * 2.5);
+      for (let st = 0; st <= steps; st++) {
+        const t = st / steps;
+        ctx.beginPath();
+        ctx.arc(pPrev.x + (pNew.x - pPrev.x) * t, pPrev.y + (pNew.y - pPrev.y) * t, (pPrev.w + (pNew.w - pPrev.w) * t) / 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      currentStroke.push(pNew);
+      lastX = p.x; lastY = p.y; lastTime = p.t; lastW = cw;
+    });
+
+    canvas.addEventListener('pointerup', () => { if (isDrawing) strokes.push([...currentStroke]); isDrawing = false; });
+    window.addEventListener('resize', resize);
+
+    document.getElementById('btnClearCanvas').onclick = () => { strokes = []; redraw(); };
+    document.getElementById('btnStepBack').onclick = () => { if(strokes.length > 0) { redoStack.push(strokes.pop()); redraw(); } };
+    document.getElementById('btnStepForward').onclick = () => { if(redoStack.length > 0) { strokes.push(redoStack.pop()); redraw(); } };
+    
+    document.getElementById('btnToggleGrid').onclick = (e) => {
+      const isOn = document.getElementById('canvas-wrap').classList.toggle('show-grid');
+      e.target.classList.replace(isOn ? 'btn-secondary' : 'btn-primary', isOn ? 'btn-primary' : 'btn-secondary');
+    };
+
+    document.getElementById('btnToggleGuide').onclick = (e) => { 
+      isTraceActive = !isTraceActive;
+      e.target.classList.replace(isTraceActive ? 'btn-secondary' : 'btn-primary', isTraceActive ? 'btn-primary' : 'btn-secondary');
+      drawGuide(); 
+    };
+
+    setTimeout(resize, 100);
+    return { clear: () => { strokes = []; redraw(); }, drawGuide };
+  };
+
+  const canvasCtrl = setupCanvas();
+
+  const renderGallery = (filterText = "") => {
+    const grid = document.getElementById('galleryGrid');
+    grid.innerHTML = '';
+    let list = (filterText.trim() === "") ? [...characters].sort(() => 0.5 - Math.random()).slice(0, 8) : characters.filter(i => i.meaning.toLowerCase().startsWith(filterText.toLowerCase()));
+
+    list.forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'bg-white/70 p-8 rounded-[2.5rem] flex flex-col items-center justify-center cursor-pointer active:scale-90 shadow-sm';
+      div.innerHTML = `<div class="text-7xl mb-4 text-black font-normal" style="font-family:'Noto Serif SC'">${item.char}</div><div class="text-2xl uppercase font-bold text-[#a67c52]">${item.pinyin}</div><div class="text-2xl italic text-black font-black text-center leading-tight">${item.meaning}</div>`;
+      div.onclick = () => {
+        currentChar = item;
+        document.getElementById('displayArea').innerText = item.char;
+        document.getElementById('charPinyin').innerText = item.pinyin;
+        document.getElementById('charMeaning').innerText = item.meaning;
+        canvasCtrl.clear(); canvasCtrl.drawGuide();
+        document.getElementById('btnPractice').click();
+      };
+      grid.appendChild(div);
+    });
+  };
+
+  document.getElementById('searchBar').oninput = (e) => renderGallery(e.target.value);
+  document.getElementById('btnGallery').onclick = () => {
+    document.getElementById('galleryView').classList.remove('hidden');
+    document.getElementById('practiceView').classList.add('hidden');
+    document.getElementById('btnGallery').classList.replace('btn-secondary', 'btn-primary');
+    document.getElementById('btnPractice').classList.replace('btn-primary', 'btn-secondary');
+    renderGallery();
+  };
+  document.getElementById('btnPractice').onclick = () => {
+    document.getElementById('practiceView').classList.remove('hidden');
+    document.getElementById('galleryView').classList.add('hidden');
+    document.getElementById('btnPractice').classList.replace('btn-secondary', 'btn-primary');
+    document.getElementById('btnGallery').classList.replace('btn-primary', 'btn-secondary');
+  };
+  document.getElementById('btnGenerate').onclick = () => {
+    currentChar = characters[Math.floor(Math.random()*characters.length)];
+    document.getElementById('displayArea').innerText = currentChar.char;
+    document.getElementById('charPinyin').innerText = currentChar.pinyin;
+    document.getElementById('charMeaning').innerText = currentChar.meaning;
+    canvasCtrl.clear(); canvasCtrl.drawGuide();
+  };
+
+  lucide.createIcons();
+  </script>
+</body>
+</html>
