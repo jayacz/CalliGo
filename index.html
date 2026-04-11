@@ -9,7 +9,6 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ff">
 
-  <!-- Ikona s hnedým pozadím -->
   <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23a67c52%22/><text y=%2250%%22 x=%2250%%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-family=%22serif%22 font-size=%2260%22 fill=%22white%22 font-weight=%22bold%22>书</text></svg>">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23a67c52%22/><text y=%2250%%22 x=%2250%%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-family=%22serif%22 font-size=%2260%22 fill=%22white%22 font-weight=%22bold%22>书</text></svg>">
 
@@ -18,9 +17,14 @@
   <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Noto+Serif+SC:wght@400;700;900&family=Cormorant+Garamond:wght@400;600&display=swap" rel="stylesheet">
   
   <style>
-    /* RESET & FIXNÁ VÝŠKA */
-    * { box-sizing: border-box; margin: 0; padding: 0; touch-action: none; }
-    html, body { width: 100%; height: 100dvh; background-color: #f8f5ff; overflow: hidden; position: fixed; }
+    * { box-sizing: border-box; margin: 0; padding: 0; touch-action: manipulation; }
+    
+    html, body { 
+      width: 100%; 
+      height: 100dvh; 
+      background-color: #f8f5ff; 
+      overflow: hidden; /* Základný scroll vypnutý kvôli Practice View */
+    }
     
     body { 
       font-family: 'Cormorant Garamond', serif; 
@@ -30,33 +34,33 @@
       padding: env(safe-area-inset-top) 15px env(safe-area-inset-bottom);
     }
 
-    /* ŠÍRKY */
     .w-total { width: 100%; max-width: 420px; } 
     .w-symbol { width: 100%; max-width: 350px; } 
-    .w-nav { width: 100%; max-width: 280px; }    
 
     /* HEADER */
-    .app-header { width: 100%; max-width: 420px; text-align: center; flex-shrink: 0; padding-top: 10px; }
+    .app-header { width: 100%; max-width: 420px; text-align: center; flex-shrink: 0; padding-top: 10px; position: relative; left: -45px; }
     .header-group { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; width: 100%; margin-bottom: -5px; }
     .title-char { font-family: 'Noto Serif SC', serif; font-size: clamp(2.5rem, 10vw, 4.2rem); color: #a67c52; -webkit-text-stroke: 1.5px #000; font-weight: 400; line-height: 1; justify-self: end; padding-right: 15px; }
     .app-title-text { font-family: 'Dancing Script', cursive; color: #000; font-size: clamp(2.5rem, 10vw, 4.2rem); line-height: 1; }
     .title-spacer { width: 100%; } 
-    .motto { font-size: clamp(1rem, 4.2vw, 1.5rem); font-weight: 800; text-align: center; text-decoration: underline; text-decoration-color: #000; text-underline-offset: 4px; text-decoration-thickness: 2px; }
+    .motto { font-size: clamp(1rem, 4.2vw, 1.5rem); font-weight: 800; text-align: center; text-decoration: underline; text-decoration-color: #000; text-underline-offset: 4px; text-decoration-thickness: 2px; margin-top: 2px; }
 
     /* NAVIGATION */
-    nav { flex-shrink: 0; margin: 12px 0; }
+    nav { flex-shrink: 0; margin: 12px 0; width: 280px; display: flex; gap: 8px; }
 
-    /* HLAVNÝ KONTAJNER */
-    main { flex-grow: 1; width: 100%; position: relative; min-height: 0; }
-    .view-container { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; }
+    /* MAIN AREA */
+    main { flex-grow: 1; width: 100%; position: relative; overflow: hidden; min-height: 0; }
 
-    /* PRACTICE VIEW layout */
-    #practiceView { height: 100%; justify-content: space-between; padding-bottom: 5px; }
+    /* PRACTICE VIEW (No Scroll) */
+    #practiceView { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: space-between; overflow: hidden; }
 
-    /* CANVAS ADAPTIVE BOX */
+    /* CALLIDEX VIEW (Scrollable) */
+    #galleryView { height: 100%; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 10px 0 80px 0; display: flex; flex-direction: column; align-items: center; }
+    #galleryView::-webkit-scrollbar { display: none; }
+
+    /* CANVAS ADAPTIVE */
     .canvas-flex-box { flex-grow: 1; width: 100%; display: flex; align-items: center; justify-content: center; min-height: 0; padding: 5px 0; }
     .canvas-card { position: relative; width: 100%; aspect-ratio: 1/1; max-height: 100%; background-color: #f7ead0; border: 8px solid white; border-radius: 2.5rem; overflow: hidden; }
-    
     #drawingCanvas { position: absolute; top: 0; left: 0; z-index: 10; touch-action: none; width: 100%; height: 100%; }
     #guideCanvas { position: absolute; top: 0; left: 0; z-index: 2; opacity: 0.6; pointer-events: none; width: 100%; height: 100%; }
     .paper-texture { background-image: url("https://www.transparenttextures.com/patterns/handmade-paper.png"); width: 100%; height: 100%; }
@@ -68,11 +72,7 @@
       background-size: auto, 100px 100px, 100px 100px !important;
     }
 
-    /* CALLIDEX SCROLLING */
-    #galleryView { overflow-y: auto; touch-action: pan-y; padding: 0 5px 40px 5px; }
-    #galleryView::-webkit-scrollbar { display: none; }
-
-    /* TLAČIDLÁ */
+    /* BUTTONS */
     .btn-base { transition: all 0.2s ease; font-weight: 900; text-transform: uppercase; display: flex; align-items: center; justify-content: center; border-radius: 1.5rem; cursor: pointer; }
     .btn-primary { background-color: #a67c52; color: white; border: 3px solid #a67c52; }
     .btn-secondary { background-color: white; color: #a67c52; border: 3px solid rgba(166, 124, 82, 0.3); }
@@ -92,15 +92,14 @@
       <p class="motto">Gotta Write ’Em All!</p>
     </header>
 
-    <nav class="w-nav flex gap-2">
+    <nav>
       <button id="btnPractice" class="btn-base flex-1 py-2.5 text-lg btn-primary">Practice</button>
       <button id="btnGallery" class="btn-base flex-1 py-2.5 text-lg btn-secondary">Callidex</button>
     </nav>
 
     <main>
       <!-- PRACTICE VIEW -->
-      <div id="practiceView" class="view-container">
-        <!-- Symbol Card -->
+      <div id="practiceView">
         <div class="w-symbol flex items-center justify-between bg-white/70 backdrop-blur-xl p-3 rounded-[2rem] border border-white shadow-sm flex-shrink-0">
           <div class="flex items-center gap-6 pl-2">
             <div id="displayArea" class="text-5xl text-black font-normal" style="font-family:'Noto Serif SC',serif;">永</div>
@@ -112,19 +111,17 @@
           <button id="btnGenerate" class="btn-primary p-2.5 rounded-xl active:scale-90"><i data-lucide="refresh-cw" class="w-5 h-5"></i></button>
         </div>
 
-        <!-- Canvas adaptive box -->
-        <div class="canvas-flex-box w-total">
+        <div class="canvas-flex-box w-total px-2">
             <div class="canvas-card shadow-lg" id="canvas-card">
               <canvas id="guideCanvas" class="paper-texture"></canvas>
               <canvas id="drawingCanvas"></canvas>
             </div>
         </div>
 
-        <!-- Spodný Toolbar -->
         <div class="w-symbol flex flex-col gap-2 bg-white/30 p-3 rounded-[2rem] shadow-md flex-shrink-0">
           <div class="flex gap-2 w-full">
             <button id="btnStepBack" class="btn-base p-3 btn-secondary shrink-0"><i data-lucide="undo-2"></i></button>
-            <button id="btnClearCanvas" class="btn-base flex-1 py-3 text-lg btn-secondary">Clear</button>
+            <button id="btnClearCanvas" class="btn-base flex-1 py-3 text-lg btn-secondary uppercase">Clear</button>
             <button id="btnStepForward" class="btn-base p-3 btn-secondary shrink-0"><i data-lucide="redo-2"></i></button>
           </div>
           <div class="flex gap-2 w-full">
@@ -135,9 +132,9 @@
       </div>
 
       <!-- CALLIDEX VIEW (Scrollable) -->
-      <div id="galleryView" class="view-container hidden">
+      <div id="galleryView" class="hidden">
         <input type="text" id="searchBar" class="w-full max-w-[350px] p-3 mb-6 rounded-xl border-2 border-[#a67c52]/30 outline-none text-center text-xl shadow-sm flex-shrink-0" placeholder="Search by meaning...">
-        <div id="galleryGrid" class="w-full grid grid-cols-2 gap-4"></div>
+        <div id="galleryGrid" class="w-full grid grid-cols-2 gap-4 px-2"></div>
       </div>
     </main>
 
@@ -158,7 +155,6 @@
   let currentChar = characters[0];
   let isTraceActive = false;
 
-  // --- CANVAS ENGINE ---
   const setupCanvas = () => {
     const canvas = document.getElementById('drawingCanvas');
     const gCanvas = document.getElementById('guideCanvas');
@@ -168,44 +164,42 @@
     let lastX, lastY, lastW, lastTime;
 
     const resize = () => {
-      const size = canvas.parentElement.clientWidth;
+      const parent = canvas.parentElement;
       const dpr = window.devicePixelRatio || 1;
+      const size = parent.clientWidth;
       canvas.width = size * dpr; canvas.height = size * dpr;
       gCanvas.width = size * dpr; gCanvas.height = size * dpr;
-      canvas.style.width = size + 'px'; canvas.style.height = size + 'px';
       ctx.scale(dpr, dpr); gCtx.scale(dpr, dpr);
       redraw();
     };
 
     const redraw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      strokes.forEach(s => drawPath(s));
-      drawGuide();
-    };
-
-    const drawPath = (pts) => {
-      if (pts.length < 2) return;
       ctx.fillStyle = '#000';
-      for (let i = 1; i < pts.length; i++) {
-        const p1 = pts[i-1], p2 = pts[i];
-        const dist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
-        const steps = Math.ceil(dist * 2.5);
-        for (let s = 0; s <= steps; s++) {
-          const t = s / steps;
-          const x = p1.x + (p2.x - p1.x) * t;
-          const y = p1.y + (p2.y - p1.y) * t;
-          const w = p1.w + (p2.w - p1.w) * t;
-          ctx.beginPath(); ctx.arc(x, y, w / 2, 0, Math.PI * 2); ctx.fill();
+      strokes.forEach(s => {
+        if (s.length < 2) return;
+        for (let i = 1; i < s.length; i++) {
+          const p1 = s[i-1], p2 = s[i];
+          const dist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+          const steps = Math.ceil(dist * 2.5);
+          for (let st = 0; st <= steps; st++) {
+            const t = st / steps;
+            const x = p1.x + (p2.x - p1.x) * t;
+            const y = p1.y + (p2.y - p1.y) * t;
+            const w = (p1.w + (p2.w - p1.w) * t);
+            ctx.beginPath(); ctx.arc(x, y, w / 2, 0, Math.PI * 2); ctx.fill();
+          }
         }
-      }
+      });
+      drawGuide();
     };
 
     const drawGuide = () => {
       gCtx.clearRect(0, 0, gCanvas.width, gCanvas.height);
       if (!isTraceActive) return;
-      const s = canvas.width / (window.devicePixelRatio || 1);
+      const s = gCanvas.width / (window.devicePixelRatio || 1);
       gCtx.font = `400 ${s * 0.72}px "Noto Serif SC"`;
-      gCtx.fillStyle = 'rgba(0,0,0,0.6)'; // Darker trace
+      gCtx.fillStyle = 'rgba(0,0,0,0.55)';
       gCtx.textAlign = 'center'; gCtx.textBaseline = 'middle';
       gCtx.fillText(currentChar.char, s/2, s/2);
     };
@@ -219,8 +213,9 @@
 
     canvas.addEventListener('pointerdown', (e) => {
       isDrawing = true; const p = getPos(e);
-      lastX = p.x; lastY = p.y; lastTime = p.t; lastW = 22; // JUICY START
+      lastX = p.x; lastY = p.y; lastTime = p.t; lastW = 22;
       currentStroke = [{ x: p.x, y: p.y, w: lastW }];
+      ctx.fillStyle = '#000';
       ctx.beginPath(); ctx.arc(p.x, p.y, lastW/2, 0, Math.PI*2); ctx.fill();
     });
 
@@ -228,10 +223,18 @@
       if (!isDrawing) return;
       const p = getPos(e); const d = Math.hypot(p.x - lastX, p.y - lastY);
       const v = (p.t - lastTime) > 0 ? d / (p.t - lastTime) : 0;
-      let targetW = Math.max(1.5, 22 - (v * 11)); 
+      let targetW = Math.max(1.5, 20 - (v * 10));
       const cw = lastW * 0.3 + targetW * 0.7;
       const pPrev = currentStroke[currentStroke.length - 1], pNew = { x: p.x, y: p.y, w: cw };
-      drawPath([pPrev, pNew]);
+      
+      const segDist = Math.hypot(pNew.x - pPrev.x, pNew.y - pPrev.y);
+      const steps = Math.ceil(segDist * 2.5);
+      for (let st = 0; st <= steps; st++) {
+        const t = st / steps;
+        ctx.beginPath();
+        ctx.arc(pPrev.x + (pNew.x - pPrev.x) * t, pPrev.y + (pNew.y - pPrev.y) * t, (pPrev.w + (pNew.w - pPrev.w) * t) / 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
       currentStroke.push(pNew);
       lastX = p.x; lastY = p.y; lastTime = p.t; lastW = cw;
     });
@@ -239,13 +242,13 @@
     canvas.addEventListener('pointerup', () => { if (isDrawing) strokes.push([...currentStroke]); isDrawing = false; });
     window.addEventListener('resize', resize);
     document.getElementById('btnClearCanvas').onclick = () => { strokes = []; redraw(); };
-    document.getElementById('btnStepBack').onclick = () => { if(strokes.length > 0) { redoStack.push(strokes.pop()); redraw(); } };
-    document.getElementById('btnStepForward').onclick = () => { if(redoStack.length > 0) { strokes.push(redoStack.pop()); redraw(); } };
+    document.getElementById('btnStepBack').onclick = () => { strokes.pop(); redraw(); };
     
     document.getElementById('btnToggleGrid').onclick = (e) => {
       const isOn = document.getElementById('canvas-card').classList.toggle('show-grid');
       e.target.classList.replace(isOn ? 'btn-secondary' : 'btn-primary', isOn ? 'btn-primary' : 'btn-secondary');
     };
+
     document.getElementById('btnToggleGuide').onclick = (e) => { 
       isTraceActive = !isTraceActive;
       e.target.classList.replace(isTraceActive ? 'btn-secondary' : 'btn-primary', isTraceActive ? 'btn-primary' : 'btn-secondary');
@@ -261,7 +264,8 @@
   const renderGallery = (filterText = "") => {
     const grid = document.getElementById('galleryGrid');
     grid.innerHTML = '';
-    let list = (filterText.trim() === "") ? [...characters].sort(() => 0.5 - Math.random()).slice(0, 8) : characters.filter(i => i.meaning.toLowerCase().startsWith(filterText.toLowerCase())).slice(0, 50);
+    let list = (filterText.trim() === "") ? [...characters].sort(() => 0.5 - Math.random()).slice(0, 8) : characters.filter(i => i.meaning.toLowerCase().startsWith(filterText.toLowerCase()));
+
     list.forEach(item => {
       const div = document.createElement('div');
       div.className = 'bg-white/70 p-8 rounded-[2.5rem] flex flex-col items-center justify-center cursor-pointer transition-all active:scale-95 shadow-sm';
@@ -279,8 +283,6 @@
   };
 
   document.getElementById('searchBar').oninput = (e) => renderGallery(e.target.value);
-
-  // --- REBIRTHED NAV PREPÍNANIE ---
   document.getElementById('btnGallery').onclick = () => {
     document.getElementById('galleryView').classList.remove('hidden');
     document.getElementById('practiceView').classList.add('hidden');
@@ -288,14 +290,12 @@
     document.getElementById('btnPractice').classList.replace('btn-primary', 'btn-secondary');
     renderGallery();
   };
-
   document.getElementById('btnPractice').onclick = () => {
     document.getElementById('practiceView').classList.remove('hidden');
     document.getElementById('galleryView').classList.add('hidden');
     document.getElementById('btnPractice').classList.replace('btn-secondary', 'btn-primary');
     document.getElementById('btnGallery').classList.replace('btn-primary', 'btn-secondary');
   };
-
   document.getElementById('btnGenerate').onclick = () => {
     currentChar = characters[Math.floor(Math.random()*characters.length)];
     document.getElementById('displayArea').innerText = currentChar.char;
@@ -304,7 +304,7 @@
     canvasCtrl.clear(); canvasCtrl.drawGuide();
   };
 
-  window.onload = () => { lucide.createIcons(); };
+  lucide.createIcons();
   </script>
 </body>
 </html>
