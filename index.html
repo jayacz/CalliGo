@@ -1165,9 +1165,10 @@
       }
     };
 
-    const drawGuide = () => {
+    const drawGuide = async () => {
       gCtx.clearRect(0, 0, gCanvas.width, gCanvas.height);
       if (!isTraceActive) return;
+      await document.fonts.load('400 48px "Noto Serif SC"', currentChar.char);
       const s = gCanvas.width / (window.devicePixelRatio || 1);
       gCtx.font = `400 ${s * 0.72}px "Noto Serif SC"`;
       gCtx.fillStyle = 'rgba(0,0,0,0.6)';
