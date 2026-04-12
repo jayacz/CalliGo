@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#f0eaff"/>
+  <text x="256" y="290" text-anchor="middle" dominant-baseline="central"
+        font-family="'Noto Serif SC', serif" font-weight="900" font-size="380"
+        fill="#a67c52">书</text>
+</svg>

@@ -5,9 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>书 Calli GO</title>
   
-  <meta name="theme-color" content="#f8f5ff">
+  <meta name="theme-color" content="#f0eaff">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ff">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link id="appleTouchIcon" rel="apple-touch-icon" href="favicon.svg">
 
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
@@ -1272,6 +1274,22 @@
   };
 
   lucide.createIcons();
+
+  // Generate apple-touch-icon PNG from canvas once font is loaded
+  document.fonts.load('900 48px "Noto Serif SC"', '书').then(() => {
+    const s = 180;
+    const c = document.createElement('canvas');
+    c.width = s; c.height = s;
+    const x = c.getContext('2d');
+    x.fillStyle = '#f0eaff';
+    x.beginPath(); x.roundRect(0, 0, s, s, 32); x.fill();
+    x.font = '900 140px "Noto Serif SC"';
+    x.fillStyle = '#a67c52';
+    x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.fillText('书', s/2, s/2 + 6);
+    const link = document.getElementById('appleTouchIcon');
+    link.href = c.toDataURL('image/png');
+  });
   </script>
 </body>
 </html>
