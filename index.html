@@ -1185,7 +1185,7 @@
 
     canvas.addEventListener('pointerdown', (e) => {
       isDrawing = true; const p = getPos(e);
-      lastX = p.x; lastY = p.y; lastTime = p.t; lastW = 22;
+      lastX = p.x; lastY = p.y; lastTime = p.t; lastW = 16;
       currentStroke = [{ x: p.x, y: p.y, w: lastW }];
       ctx.fillStyle = '#000';
       ctx.beginPath(); ctx.arc(p.x, p.y, lastW/2, 0, Math.PI*2); ctx.fill();
@@ -1195,7 +1195,7 @@
       if (!isDrawing) return;
       const p = getPos(e); const d = Math.hypot(p.x - lastX, p.y - lastY);
       const v = (p.t - lastTime) > 0 ? d / (p.t - lastTime) : 0;
-      let targetW = Math.max(1.5, 22 - (v * 11)); 
+      let targetW = Math.max(3, 16 - (v * 5)); 
       const cw = lastW * 0.3 + targetW * 0.7;
       const pPrev = currentStroke[currentStroke.length - 1], pNew = { x: p.x, y: p.y, w: cw };
       drawPath([pPrev, pNew]);
