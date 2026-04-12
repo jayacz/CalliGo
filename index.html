@@ -1171,7 +1171,7 @@
       await document.fonts.load('400 48px "Noto Serif SC"', currentChar.char);
       const s = gCanvas.width / (window.devicePixelRatio || 1);
       gCtx.font = `400 ${s * 0.72}px "Noto Serif SC"`;
-      gCtx.fillStyle = 'rgba(0,0,0,0.6)';
+      gCtx.fillStyle = 'rgba(0,0,0,0.4)';
       gCtx.textAlign = 'center'; gCtx.textBaseline = 'middle';
       gCtx.fillText(currentChar.char, s/2, s/2);
     };
