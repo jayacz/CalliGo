@@ -105,6 +105,10 @@
     .stroke-modal-header { width: 100%; display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding: 0 4px; }
     .stroke-writer-box { width: 250px; height: 250px; background: #f7ead0; border: 6px solid white; border-radius: 1.5rem; overflow: hidden; display: flex; align-items: center; justify-content: center; }
     .stroke-writer-box svg { display: block; }
+
+    /* Minimized floating button */
+    .stroke-fab { position: fixed; bottom: 80px; right: 16px; z-index: 99; width: 56px; height: 56px; border-radius: 50%; background: #a67c52; color: white; font-family: 'Noto Serif SC', serif; font-size: 1.6rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(0,0,0,0.3); cursor: pointer; border: 3px solid white; transition: transform 0.2s ease; }
+    .stroke-fab:active { transform: scale(0.9); }
   </style>
 </head>
 <body>
@@ -173,7 +177,10 @@
         <div class="stroke-modal-header">
           <span id="strokeModalChar" class="text-3xl font-bold" style="font-family:'Noto Serif SC',serif;">永</span>
           <span class="text-lg text-[#a67c52] font-bold">Stroke Order</span>
-          <button id="btnCloseStrokes" class="btn-base p-2 btn-secondary rounded-xl"><i data-lucide="x" class="w-5 h-5"></i></button>
+          <div class="flex gap-1">
+            <button id="btnMinimizeStrokes" class="btn-base p-2 btn-secondary rounded-xl"><i data-lucide="minus" class="w-5 h-5"></i></button>
+            <button id="btnCloseStrokes" class="btn-base p-2 btn-secondary rounded-xl"><i data-lucide="x" class="w-5 h-5"></i></button>
+          </div>
         </div>
         <div id="strokeWriterTarget" class="stroke-writer-box"></div>
         <div class="flex gap-2 w-full mt-3">
@@ -400,6 +407,8 @@
   let strokePlaying = false;
   let currentStrokeNum = 0;
   let totalStrokes = 0;
+  let strokeModalChar = null; // track which char the modal was opened for
+  let strokeFab = null; // floating restore button
   const strokeModal = document.getElementById('strokeModal');
   const strokeTarget = document.getElementById('strokeWriterTarget');
   const btnAnimate = document.getElementById('btnAnimateStrokes');
@@ -420,23 +429,58 @@
     updateStrokeButtons(true);
     for (let i = currentStrokeNum; i < totalStrokes; i++) {
       if (strokePaused) { currentStrokeNum = i; return; }
-      await new Promise((resolve, reject) => {
+      await new Promise((resolve) => {
         hwWriter.animateStroke(i, { onComplete: resolve });
       });
-      // Small delay between strokes
       if (i < totalStrokes - 1 && !strokePaused) {
-        await new Promise(r => setTimeout(r, 250));
+        await new Promise(r => setTimeout(r, 400));
       }
     }
     currentStrokeNum = 0;
     updateStrokeButtons(false);
   }
 
-  document.getElementById('btnStrokes').onclick = () => {
+  function destroyStrokeModal() {
+    strokeModal.classList.add('hidden');
     strokeTarget.innerHTML = '';
+    hwWriter = null;
+    strokeModalChar = null;
     strokePaused = false;
     strokePlaying = false;
     currentStrokeNum = 0;
+    removeStrokeFab();
+  }
+
+  function removeStrokeFab() {
+    if (strokeFab) { strokeFab.remove(); strokeFab = null; }
+  }
+
+  function minimizeStrokeModal() {
+    strokeModal.classList.add('hidden');
+    removeStrokeFab();
+    // Create floating button to restore
+    strokeFab = document.createElement('button');
+    strokeFab.className = 'stroke-fab';
+    strokeFab.textContent = strokeModalChar;
+    strokeFab.title = 'Show stroke order';
+    strokeFab.onclick = restoreStrokeModal;
+    document.body.appendChild(strokeFab);
+  }
+
+  function restoreStrokeModal() {
+    removeStrokeFab();
+    strokeModal.classList.remove('hidden');
+  }
+
+  document.getElementById('btnStrokes').onclick = () => {
+    // If modal is minimized for the same char, just restore it
+    if (hwWriter && strokeModalChar === currentChar.char) {
+      restoreStrokeModal();
+      return;
+    }
+    // New character — fresh modal
+    destroyStrokeModal();
+    strokeModalChar = currentChar.char;
     document.getElementById('strokeModalChar').innerText = currentChar.char;
 
     hwWriter = HanziWriter.create(strokeTarget, currentChar.char, {
@@ -447,8 +491,8 @@
       showCharacter: false,
       strokeColor: '#000',
       outlineColor: '#ddd',
-      strokeAnimationSpeed: 1,
-      delayBetweenStrokes: 300,
+      strokeAnimationSpeed: 0.6,
+      delayBetweenStrokes: 400,
       charDataLoader: (char, onComplete) => {
         fetch(`https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0/${encodeURIComponent(char)}.json`)
           .then(r => r.json())
@@ -458,7 +502,6 @@
 
     strokeModal.classList.remove('hidden');
     updateStrokeButtons(false);
-    setTimeout(() => animateStrokeByStroke(), 300);
   };
 
   btnAnimate.onclick = () => {
@@ -471,29 +514,22 @@
 
   btnPause.onclick = () => {
     if (strokePaused) {
-      // Resume
       strokePaused = false;
       btnPause.textContent = 'Pause';
       btnPause.classList.replace('btn-primary', 'btn-secondary');
       animateStrokeByStroke();
     } else {
-      // Pause
       strokePaused = true;
       btnPause.textContent = 'Resume';
       btnPause.classList.replace('btn-secondary', 'btn-primary');
     }
   };
 
-  document.getElementById('btnCloseStrokes').onclick = () => {
-    strokeModal.classList.add('hidden');
-    strokeTarget.innerHTML = '';
-    hwWriter = null;
-  };
+  document.getElementById('btnMinimizeStrokes').onclick = () => minimizeStrokeModal();
 
-  // Close on backdrop click
-  document.querySelector('.stroke-modal-backdrop').onclick = () => {
-    document.getElementById('btnCloseStrokes').click();
-  };
+  document.getElementById('btnCloseStrokes').onclick = () => destroyStrokeModal();
+
+  document.querySelector('.stroke-modal-backdrop').onclick = () => minimizeStrokeModal();
 
   lucide.createIcons();
 
