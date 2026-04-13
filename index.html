@@ -174,9 +174,9 @@
     <div id="strokeModal" class="stroke-modal hidden">
       <div class="stroke-modal-backdrop"></div>
       <div class="stroke-modal-content">
-        <div class="stroke-modal-header">
-          <span id="strokeModalChar" class="text-3xl font-bold" style="font-family:'Noto Serif SC',serif;">永</span>
-          <span class="text-lg text-[#a67c52] font-bold">Stroke Order</span>
+        <div class="stroke-modal-header" style="align-items:center;">
+          <span id="strokeModalChar" class="text-black font-bold leading-none" style="font-family:'Noto Serif SC',serif; font-size:2.25rem;">永</span>
+          <span class="text-[#a67c52] font-bold leading-none" style="font-size:1.6rem;"><span id="strokeCount">—</span> Strokes</span>
           <div class="flex gap-1">
             <button id="btnMinimizeStrokes" class="btn-base p-2 btn-secondary rounded-xl"><i data-lucide="minus" class="w-5 h-5"></i></button>
             <button id="btnCloseStrokes" class="btn-base p-2 btn-secondary rounded-xl"><i data-lucide="x" class="w-5 h-5"></i></button>
@@ -482,6 +482,7 @@
     destroyStrokeModal();
     strokeModalChar = currentChar.char;
     document.getElementById('strokeModalChar').innerText = currentChar.char;
+    document.getElementById('strokeCount').textContent = '—';
 
     hwWriter = HanziWriter.create(strokeTarget, currentChar.char, {
       width: 238,
@@ -496,7 +497,7 @@
       charDataLoader: (char, onComplete) => {
         fetch(`https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0/${encodeURIComponent(char)}.json`)
           .then(r => r.json())
-          .then(data => { totalStrokes = data.strokes.length; onComplete(data); });
+          .then(data => { totalStrokes = data.strokes.length; document.getElementById('strokeCount').textContent = totalStrokes; onComplete(data); });
       }
     });
 
