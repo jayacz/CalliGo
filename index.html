@@ -355,7 +355,7 @@
     const grid = document.getElementById('galleryGrid');
     grid.innerHTML = '';
     const q = filterText.trim().toLowerCase();
-    let list = (q === "") ? [...characters].sort(() => 0.5 - Math.random()).slice(0, 8) : characters.filter(i => i.char === q || i.pinyin.toLowerCase().startsWith(q) || i.meaning.toLowerCase().includes(q)).slice(0, 50);
+    let list = (q === "") ? [...characters].sort(() => 0.5 - Math.random()).slice(0, 8) : characters.filter(i => i.meaning.toLowerCase().startsWith(q)).slice(0, 50);
     list.forEach(item => {
       const div = document.createElement('div');
       div.className = 'bg-white/70 p-8 rounded-[2.5rem] flex flex-col items-center justify-center cursor-pointer transition-all active:scale-95 shadow-sm';
